@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 Ritense BV, the Netherlands.
+ * Copyright 2015-2026 Ritense BV, the Netherlands.
  *
  * Licensed under EUPL, Version 1.2 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-/*
- * Public API Surface of OIP Klanttaak plugin
- */
+package com.ritense.valtimoplugins.oipklanttaak.domain
 
-export * from './lib/models';
-export * from './lib/oip-klanttaak-plugin.module';
-export * from './lib/oip-klanttaak-plugin.specification';
-export * from './lib/components/configuration/configuration.component';
-export * from './lib/components/delegate-task/delegate-task.component';
-export * from './lib/components/complete-delegated-task/complete-delegated-task.component';
+data class LegalSubject(
+    val identifier: String,
+    val identifierType: IdentifierType = IdentifierType.BSN,
+)

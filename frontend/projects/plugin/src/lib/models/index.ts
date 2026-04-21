@@ -14,13 +14,4 @@
  * limitations under the License.
  */
 
-/*
- * Public API Surface of OIP Klanttaak plugin
- */
-
-export * from './lib/models';
-export * from './lib/oip-klanttaak-plugin.module';
-export * from './lib/oip-klanttaak-plugin.specification';
-export * from './lib/components/configuration/configuration.component';
-export * from './lib/components/delegate-task/delegate-task.component';
-export * from './lib/components/complete-delegated-task/complete-delegated-task.component';
+export * from './config.models';
