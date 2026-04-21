@@ -18,21 +18,21 @@ val kotlinLoggingVersion: String by project
 val mockitoKotlinVersion: String by project
 
 dependencies {
-    implementation("com.ritense.valtimo:contract")
-    implementation("com.ritense.valtimo:case")
-    implementation("com.ritense.valtimo:core")
-    implementation("com.ritense.valtimo:notificaties-api")
-    implementation("com.ritense.valtimo:objecten-api")
-    implementation("com.ritense.valtimo:objecttypen-api")
-    implementation("com.ritense.valtimo:object-management")
-    implementation("com.ritense.valtimo:notificaties-api")
-    implementation("com.ritense.valtimo:plugin-valtimo")
-    implementation("com.ritense.valtimo:process-document")
-    implementation("com.ritense.valtimo:value-resolver")
-    implementation("com.ritense.valtimo:zaken-api")
+    compileOnly("com.ritense.valtimo:contract")
+    compileOnly("com.ritense.valtimo:case")
+    compileOnly("com.ritense.valtimo:core")
+    compileOnly("com.ritense.valtimo:notificaties-api")
+    compileOnly("com.ritense.valtimo:objecten-api")
+    compileOnly("com.ritense.valtimo:objecttypen-api")
+    compileOnly("com.ritense.valtimo:object-management")
+    compileOnly("com.ritense.valtimo:notificaties-api")
+    compileOnly("com.ritense.valtimo:plugin-valtimo")
+    compileOnly("com.ritense.valtimo:process-document")
+    compileOnly("com.ritense.valtimo:value-resolver")
+    compileOnly("com.ritense.valtimo:zaken-api")
 
     // Logging
-    implementation("io.github.oshai:kotlin-logging:$kotlinLoggingVersion")
+    compileOnly("io.github.oshai:kotlin-logging:$kotlinLoggingVersion")
 
     // Testing
     testImplementation("org.jetbrains.kotlin:kotlin-test")
