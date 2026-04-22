@@ -18,5 +18,5 @@ package com.ritense.valtimoplugins.oipklanttaak.dto
 
 class DataBinding(
     val key: String,
-    val value: String
+    val value: String,
 )

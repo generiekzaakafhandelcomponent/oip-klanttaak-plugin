@@ -32,19 +32,19 @@ import com.ritense.objecttypenapi.ObjecttypenApiPlugin
 import com.ritense.plugin.service.PluginService
 import com.ritense.valtimo.contract.json.patch.JsonPatchBuilder
 import com.ritense.valtimo.service.OperatonTaskService
+import com.ritense.valtimoplugins.oipklanttaak.ProcessVariables
 import com.ritense.valtimoplugins.oipklanttaak.domain.Authorizee
 import com.ritense.valtimoplugins.oipklanttaak.domain.Betrokkene
-import com.ritense.valtimoplugins.oipklanttaak.dto.DataBinding
 import com.ritense.valtimoplugins.oipklanttaak.domain.Formulier
 import com.ritense.valtimoplugins.oipklanttaak.domain.InformatieObject
+import com.ritense.valtimoplugins.oipklanttaak.domain.Klanttaak
 import com.ritense.valtimoplugins.oipklanttaak.domain.Koppeling
 import com.ritense.valtimoplugins.oipklanttaak.domain.LegalSubject
 import com.ritense.valtimoplugins.oipklanttaak.domain.LevelOfAssurance
-import com.ritense.valtimoplugins.oipklanttaak.domain.Klanttaak
 import com.ritense.valtimoplugins.oipklanttaak.domain.Portaalformulier
-import com.ritense.valtimoplugins.oipklanttaak.ProcessVariables
 import com.ritense.valtimoplugins.oipklanttaak.domain.Soort
 import com.ritense.valtimoplugins.oipklanttaak.domain.Status
+import com.ritense.valtimoplugins.oipklanttaak.dto.DataBinding
 import com.ritense.valueresolver.ValueResolverService
 import com.ritense.zakenapi.ZaakUrlProvider
 import com.ritense.zakenapi.ZakenApiPlugin
@@ -63,9 +63,8 @@ class OipKlanttaakService(
     private val objectMapper: ObjectMapper,
     private val taskService: OperatonTaskService,
     private val valueResolverService: ValueResolverService,
-    private val zaakUrlProvider: ZaakUrlProvider
+    private val zaakUrlProvider: ZaakUrlProvider,
 ) {
-
     fun delegateTask(
         delegateTask: DelegateTask,
         objectManagementId: UUID,
@@ -82,48 +81,58 @@ class OipKlanttaakService(
     ) {
         objectManagementById(objectManagementId).let { objectManagement ->
             objectTypenApiPluginByPluginConfigurationId(objectManagement.objecttypenApiPluginConfigurationId)
-                .getObjectTypeUrlById(objectManagement.objecttypeId).let { objectTypeUrl ->
+                .getObjectTypeUrlById(objectManagement.objecttypeId)
+                .let { objectTypeUrl ->
                     objectenApiPluginByPluginConfigurationId(objectManagement.objectenApiPluginConfigurationId)
                         .createObject(
                             ObjectRequest(
                                 type = objectTypeUrl,
-                                record = ObjectRecord(
-                                    typeVersion = objectManagement.objecttypeVersion,
-                                    data = objectMapper.convertValue(
-                                        Klanttaak(
-                                            titel = delegateTask.name,
-                                        status = Status.OPEN,
-                                        eigenaar = taskOwner,
-                                        betrokkene = Betrokkene(
-                                            levelOfAssurance = levelOfAssurance,
-                                            authorizee = Authorizee(
-                                                legalSubject = LegalSubject(
-                                                    identifier = authorizeeIdentifier
-                                                )
-                                            )
-                                        ),
-                                        portaalformulier = Portaalformulier(
-                                            formulier = Formulier(
-                                                value = formUri
+                                record =
+                                    ObjectRecord(
+                                        typeVersion = objectManagement.objecttypeVersion,
+                                        data =
+                                            objectMapper.convertValue(
+                                                Klanttaak(
+                                                    titel = delegateTask.name,
+                                                    status = Status.OPEN,
+                                                    eigenaar = taskOwner,
+                                                    betrokkene =
+                                                        Betrokkene(
+                                                            levelOfAssurance = levelOfAssurance,
+                                                            authorizee =
+                                                                Authorizee(
+                                                                    legalSubject =
+                                                                        LegalSubject(
+                                                                            identifier = authorizeeIdentifier,
+                                                                        ),
+                                                                ),
+                                                        ),
+                                                    portaalformulier =
+                                                        Portaalformulier(
+                                                            formulier =
+                                                                Formulier(
+                                                                    value = formUri,
+                                                                ),
+                                                            data =
+                                                                formDataMapping?.let {
+                                                                    resolveTaakData(
+                                                                        delegateTask = delegateTask,
+                                                                        formDataMapping = it,
+                                                                    )
+                                                                },
+                                                            verzondenData = emptyMap(),
+                                                        ),
+                                                    verwerkerTaakId = UUID.fromString(delegateTask.id),
+                                                    koppeling = koppeling,
+                                                    toelichting = description,
+                                                    doorlooptijd = leadTime,
+                                                    verloopdatum = expirationDate,
+                                                    deadlineVerlengbaar = deadlineExtendable,
+                                                ),
                                             ),
-                                            data = formDataMapping?.let {
-                                                resolveTaakData(
-                                                    delegateTask = delegateTask,
-                                                    formDataMapping = it
-                                                )
-                                            },
-                                            verzondenData = emptyMap()
-                                        ),
-                                        verwerkerTaakId = UUID.fromString(delegateTask.id),
-                                        koppeling = koppeling,
-                                        toelichting = description,
-                                        doorlooptijd = leadTime,
-                                        verloopdatum = expirationDate,
-                                        deadlineVerlengbaar = deadlineExtendable
-                                    )),
-                                    startAt = LocalDate.now()
-                                )
-                            )
+                                        startAt = LocalDate.now(),
+                                    ),
+                            ),
                         ).also {
                             logger.info {
                                 "Klanttaak object with UUID '${it.uuid}' and URL '${it.url}' created for " +
@@ -136,35 +145,40 @@ class OipKlanttaakService(
 
     private fun resolveTaakData(
         delegateTask: DelegateTask,
-        formDataMapping: List<DataBinding>
+        formDataMapping: List<DataBinding>,
     ): Map<String, Any> {
-        valueResolverService.resolveValues(
-            processInstanceId = delegateTask.processInstanceId,
-            variableScope = delegateTask,
-            requestedValues = formDataMapping.map { it.value }
-        ).let { resolvedValuesMap ->
-            if (formDataMapping.size != resolvedValuesMap.size) {
-                formDataMapping.filter { !resolvedValuesMap.containsKey(it.value) }
-                    .joinToString(", ") { "'${it.key}' = '${it.value}'" }.let { failedValues ->
-                        throw IllegalArgumentException(
-                            "Error in data mapping for Task(id=${delegateTask.id}, key=${delegateTask.taskDefinitionKey})'. " +
-                                "Failed to resolve values: $failedValues"
-                        )
-                    }
-            }
-            JsonPatchBuilder().let { jsonPatchBuilder ->
-                objectMapper.createObjectNode().let { taakData ->
-                    formDataMapping.associate { it.key to resolvedValuesMap[it.value] }.forEach {
-                        val path = JsonPointer.valueOf(it.key)
-                        val valueNode = objectMapper.valueToTree<JsonNode>(it.value)
-                        jsonPatchBuilder.addJsonNodeValue(taakData, path, valueNode)
-                    }
-                    JsonPatchService.apply(jsonPatchBuilder.build(), taakData)
+        valueResolverService
+            .resolveValues(
+                processInstanceId = delegateTask.processInstanceId,
+                variableScope = delegateTask,
+                requestedValues = formDataMapping.map { it.value },
+            ).let { resolvedValuesMap ->
+                if (formDataMapping.size != resolvedValuesMap.size) {
+                    formDataMapping
+                        .filter { !resolvedValuesMap.containsKey(it.value) }
+                        .joinToString(", ") { "'${it.key}' = '${it.value}'" }
+                        .let { failedValues ->
+                            throw IllegalArgumentException(
+                                "Error in data mapping for " +
+                                    "Task(id=${delegateTask.id}, " +
+                                    "key=${delegateTask.taskDefinitionKey})'. " +
+                                    "Failed to resolve values: $failedValues",
+                            )
+                        }
+                }
+                JsonPatchBuilder().let { jsonPatchBuilder ->
+                    objectMapper.createObjectNode().let { taakData ->
+                        formDataMapping.associate { it.key to resolvedValuesMap[it.value] }.forEach {
+                            val path = JsonPointer.valueOf(it.key)
+                            val valueNode = objectMapper.valueToTree<JsonNode>(it.value)
+                            jsonPatchBuilder.addJsonNodeValue(taakData, path, valueNode)
+                        }
+                        JsonPatchService.apply(jsonPatchBuilder.build(), taakData)
 
-                    return objectMapper.convertValue(taakData)
+                        return objectMapper.convertValue(taakData)
+                    }
                 }
             }
-        }
     }
 
     fun completeDelegatedTask(
@@ -179,7 +193,9 @@ class OipKlanttaakService(
         val klanttaakObjectUrl = execution.getVariableAsURI(ProcessVariables.KLANTTAAK_OBJECT_URL)
 
         objectManagementById(objectManagementId).let { objectManagement ->
-            objectenApiPluginByPluginConfigurationId(objectManagement.objectenApiPluginConfigurationId).let { objectenApiPlugin ->
+            objectenApiPluginByPluginConfigurationId(
+                objectManagement.objectenApiPluginConfigurationId,
+            ).let { objectenApiPlugin ->
                 objectenApiPlugin.getObject(klanttaakObjectUrl).let { objectWrapper ->
                     requireNotNull(objectWrapper.record.data) {
                         "No data found for object with URL '$klanttaakObjectUrl'"
@@ -191,68 +207,89 @@ class OipKlanttaakService(
                         require(klanttaak.status == Status.UITGEVOERD) {
                             "Status is not '${Status.UITGEVOERD.name}'"
                         }
-                        AuthorizationContext.runWithoutAuthorization {
-                            taskService.complete(verwerkerTaakId)
-                        }.also {
-                            logger.info { "Task with id '$verwerkerTaakId' for object with URL '$klanttaakObjectUrl' completed" }
-                        }
+                        AuthorizationContext
+                            .runWithoutAuthorization {
+                                taskService.complete(verwerkerTaakId)
+                            }.also {
+                                logger.info {
+                                    "Task with id '$verwerkerTaakId' for object with URL '$klanttaakObjectUrl' completed"
+                                }
+                            }
 
                         if (saveReceivedData || linkDocuments) {
                             requireNotNull(klanttaak.portaalformulier.verzondenData) {
                                 "Form does not contain any submitted data"
                             }
-                            objectMapper.valueToTree<ObjectNode>(klanttaak.portaalformulier.verzondenData).let { receivedDataNode ->
-                                if (saveReceivedData) {
-                                    logger.debug { "Saving received data to document" }
-                                    requireNotNull(receivedDataMapping) { "Received data mapping is null" }
-                                    require(receivedDataMapping.isNotEmpty()) { "Received data mapping is empty" }
-                                    // extract data from submitted data and map to document
-                                    receivedDataMapping.associate { it.value to receivedDataNode.at(JsonPointer.valueOf(it.key)) }.let { resolvedData ->
-                                        valueResolverService.handleValues(
-                                            documentId = UUID.fromString(execution.businessKey),
-                                            values = resolvedData
-                                        )
+                            objectMapper
+                                .valueToTree<ObjectNode>(
+                                    klanttaak.portaalformulier.verzondenData,
+                                ).let { receivedDataNode ->
+                                    if (saveReceivedData) {
+                                        logger.debug { "Saving received data to document" }
+                                        requireNotNull(receivedDataMapping) { "Received data mapping is null" }
+                                        require(receivedDataMapping.isNotEmpty()) { "Received data mapping is empty" }
+                                        // extract data from submitted data and map to document
+                                        receivedDataMapping
+                                            .associate {
+                                                it.value to
+                                                    receivedDataNode.at(JsonPointer.valueOf(it.key))
+                                            }.let { resolvedData ->
+                                                valueResolverService.handleValues(
+                                                    documentId = UUID.fromString(execution.businessKey),
+                                                    values = resolvedData,
+                                                )
+                                            }
                                     }
-                                }
 
-                                if (linkDocuments) {
-                                    logger.debug { "Linking documents to zaak" }
-                                    requireNotNull(pathToDocuments) { "Path to documents is null" }
-                                    require(pathToDocuments.isNotBlank()) { "Path to documents is blank" }
-                                    receivedDataNode.at(JsonPointer.valueOf(pathToDocuments)).let { documentsNode ->
-                                        if (documentsNode.isArray) {
-                                            zakenApiPluginByDocumentId(UUID.fromString(execution.businessKey)).let { zakenApiPlugin ->
-                                                documentsNode.forEach { documentNode ->
-                                                    objectMapper.convertValue<InformatieObject>(documentNode).let { informatieObject ->
-                                                        zakenApiPlugin.linkDocumentToZaak(
-                                                            execution = execution,
-                                                            documentUrl = informatieObject.informatieobject.toASCIIString(),
-                                                            titel = informatieObject.titel,
-                                                            beschrijving = informatieObject.omschrijving
-                                                        )
+                                    if (linkDocuments) {
+                                        logger.debug { "Linking documents to zaak" }
+                                        requireNotNull(pathToDocuments) { "Path to documents is null" }
+                                        require(pathToDocuments.isNotBlank()) { "Path to documents is blank" }
+                                        receivedDataNode
+                                            .at(JsonPointer.valueOf(pathToDocuments))
+                                            .let { documentsNode ->
+                                                if (documentsNode.isArray) {
+                                                    zakenApiPluginByDocumentId(
+                                                        UUID.fromString(execution.businessKey),
+                                                    ).let { zakenApiPlugin ->
+                                                        documentsNode.forEach { documentNode ->
+                                                            objectMapper
+                                                                .convertValue<InformatieObject>(
+                                                                    documentNode,
+                                                                ).let { informatieObject ->
+                                                                    zakenApiPlugin.linkDocumentToZaak(
+                                                                        execution = execution,
+                                                                        documentUrl =
+                                                                            informatieObject.informatieobject
+                                                                                .toASCIIString(),
+                                                                        titel = informatieObject.titel,
+                                                                        beschrijving = informatieObject.omschrijving,
+                                                                    )
+                                                                }
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
                                     }
                                 }
-                            }
                         }
 
                         klanttaak.copy(status = Status.VERWERKT).let { modifiedOipTask ->
-                            objectenApiPlugin.objectPatch(
-                                klanttaakObjectUrl,
-                                ObjectRequest(
-                                    type = objectWrapper.type,
-                                    record = objectWrapper.record.copy(
-                                        data = objectMapper.convertValue(modifiedOipTask)
-                                    )
-                                )
-                            ).also {
-                                logger.info {
-                                    "Klanttaak object with URL '${klanttaakObjectUrl}' completed by changing status to '${Status.VERWERKT.name}'"
+                            objectenApiPlugin
+                                .objectPatch(
+                                    klanttaakObjectUrl,
+                                    ObjectRequest(
+                                        type = objectWrapper.type,
+                                        record =
+                                            objectWrapper.record.copy(
+                                                data = objectMapper.convertValue(modifiedOipTask),
+                                            ),
+                                    ),
+                                ).also {
+                                    logger.info {
+                                        "Klanttaak object with URL '$klanttaakObjectUrl' completed by changing status to '${Status.VERWERKT.name}'"
+                                    }
                                 }
-                            }
                         }
                     }
                 }
@@ -269,15 +306,16 @@ class OipKlanttaakService(
     private fun objectTypenApiPluginByPluginConfigurationId(id: UUID) =
         pluginService.createInstance<ObjecttypenApiPlugin>(id)
 
-    private fun objectenApiPluginByPluginConfigurationId(id: UUID) =
-        pluginService.createInstance<ObjectenApiPlugin>(id)
+    private fun objectenApiPluginByPluginConfigurationId(id: UUID) = pluginService.createInstance<ObjectenApiPlugin>(id)
 
     private fun zakenApiPluginByDocumentId(id: UUID): ZakenApiPlugin =
         zaakUrlProvider.getZaakUrl(id).let { zaakUrl ->
-            requireNotNull(pluginService.createInstance(
-                ZakenApiPlugin::class.java,
-                ZakenApiPlugin.findConfigurationByUrl(zaakUrl)
-            )) { "Zaken API Plugin configuration not found for zaak with URL '$zaakUrl'" }
+            requireNotNull(
+                pluginService.createInstance(
+                    ZakenApiPlugin::class.java,
+                    ZakenApiPlugin.findConfigurationByUrl(zaakUrl),
+                ),
+            ) { "Zaken API Plugin configuration not found for zaak with URL '$zaakUrl'" }
         }
 
     private fun DelegateExecution.getVariableAsString(variableName: String): String =

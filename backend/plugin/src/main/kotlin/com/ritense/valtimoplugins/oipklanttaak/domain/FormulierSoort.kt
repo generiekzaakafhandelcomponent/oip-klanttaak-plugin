@@ -18,6 +18,8 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class FormulierSoort(@JsonValue val value: String) {
+enum class FormulierSoort(
+    @JsonValue val value: String,
+) {
     URL("url"),
 }

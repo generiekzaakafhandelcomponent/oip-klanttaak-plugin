@@ -63,7 +63,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OipKlanttaakEventListenerTest {
-
     private val objectMapper = MapperSingleton.get()
 
     private lateinit var pluginServiceMock: PluginService
@@ -82,14 +81,15 @@ class OipKlanttaakEventListenerTest {
         processServiceMock = mock()
         taskServiceMock = mock()
 
-        listener = OipKlanttaakEventListener(
-            pluginService = pluginServiceMock,
-            objectManagementService = objectManagementServiceMock,
-            objectMapper = objectMapper,
-            processDocumentService = processDocumentServiceMock,
-            processService = processServiceMock,
-            taskService = taskServiceMock
-        )
+        listener =
+            OipKlanttaakEventListener(
+                pluginService = pluginServiceMock,
+                objectManagementService = objectManagementServiceMock,
+                objectMapper = objectMapper,
+                processDocumentService = processDocumentServiceMock,
+                processService = processServiceMock,
+                taskService = taskServiceMock,
+            )
     }
 
     @Test
@@ -98,22 +98,28 @@ class OipKlanttaakEventListenerTest {
         val event = notificatiesApiNotificationReceivedEvent()
 
         doReturn(objectManagementConfiguration())
-            .whenever(objectManagementServiceMock).findByObjectTypeId(eq(objectTypeId()))
+            .whenever(objectManagementServiceMock)
+            .findByObjectTypeId(eq(objectTypeId()))
 
         doReturn(oipKlanttaakPluginConfiguration())
-            .whenever(pluginServiceMock).findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
+            .whenever(pluginServiceMock)
+            .findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
 
         doReturn(objectenApiPlugin())
-            .whenever(pluginServiceMock).createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
 
         doReturn(task())
-            .whenever(taskServiceMock).findTaskById(eq(taskId().toString()))
+            .whenever(taskServiceMock)
+            .findTaskById(eq(taskId().toString()))
 
         doReturn(documentId())
-            .whenever(processDocumentServiceMock).getDocumentId(any(), any())
+            .whenever(processDocumentServiceMock)
+            .getDocumentId(any(), any())
 
         doReturn(oipKlanttaakPlugin())
-            .whenever(pluginServiceMock).createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
 
         // when
         AuthorizationContext.runWithoutAuthorization<Any> {
@@ -126,10 +132,12 @@ class OipKlanttaakEventListenerTest {
         verify(processServiceMock, times(1)).startProcess(
             any(),
             any(),
-            eq(mapOf(
-                ProcessVariables.VERWERKER_TAAK_ID to taskId().toString(),
-                ProcessVariables.KLANTTAAK_OBJECT_URL to objectUrl().toString()
-            ))
+            eq(
+                mapOf(
+                    ProcessVariables.VERWERKER_TAAK_ID to taskId().toString(),
+                    ProcessVariables.KLANTTAAK_OBJECT_URL to objectUrl().toString(),
+                ),
+            ),
         )
     }
 
@@ -141,25 +149,32 @@ class OipKlanttaakEventListenerTest {
         val event = notificatiesApiNotificationReceivedEvent()
 
         doReturn(objectManagementConfiguration())
-            .whenever(objectManagementServiceMock).findByObjectTypeId(eq(objectTypeId()))
+            .whenever(objectManagementServiceMock)
+            .findByObjectTypeId(eq(objectTypeId()))
 
         doReturn(oipKlanttaakPluginConfiguration())
-            .whenever(pluginServiceMock).findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
+            .whenever(pluginServiceMock)
+            .findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
 
         doReturn(objectenApiPlugin())
-            .whenever(pluginServiceMock).createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
 
         doReturn(task())
-            .whenever(taskServiceMock).findTaskById(eq(taskId().toString()))
+            .whenever(taskServiceMock)
+            .findTaskById(eq(taskId().toString()))
 
         doReturn(documentId())
-            .whenever(processDocumentServiceMock).getDocumentId(any(), any())
+            .whenever(processDocumentServiceMock)
+            .getDocumentId(any(), any())
 
-        doReturn(oipKlanttaakPlugin(
-            finalizerProcessIsCaseSpecific = true,
-            caseDefinitionVersion = "$caseType:$caseVersion"
-        ))
-            .whenever(pluginServiceMock).createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
+        doReturn(
+            oipKlanttaakPlugin(
+                finalizerProcessIsCaseSpecific = true,
+                caseDefinitionVersion = "$caseType:$caseVersion",
+            ),
+        ).whenever(pluginServiceMock)
+            .createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
 
         // when
         AuthorizationContext.runWithoutAuthorization<Any> {
@@ -173,21 +188,24 @@ class OipKlanttaakEventListenerTest {
             any(),
             any(),
             eq(CaseDefinitionId.of(caseType, caseVersion)),
-            eq(mapOf(
-                ProcessVariables.VERWERKER_TAAK_ID to taskId().toString(),
-                ProcessVariables.KLANTTAAK_OBJECT_URL to objectUrl().toString()
-            ))
+            eq(
+                mapOf(
+                    ProcessVariables.VERWERKER_TAAK_ID to taskId().toString(),
+                    ProcessVariables.KLANTTAAK_OBJECT_URL to objectUrl().toString(),
+                ),
+            ),
         )
     }
 
     @Test
     fun `handle should skip event if criteria do not match`() {
         // given
-        val event = mock<NotificatiesApiNotificationReceivedEvent> {
-            on { kanaal } doReturn "other"
-            on { actie } doReturn "create"
-            on { kenmerken } doReturn mapOf("objectType" to "https://example.com/objectType")
-        }
+        val event =
+            mock<NotificatiesApiNotificationReceivedEvent> {
+                on { kanaal } doReturn "other"
+                on { actie } doReturn "create"
+                on { kenmerken } doReturn mapOf("objectType" to "https://example.com/objectType")
+            }
 
         // when
         assertDoesNotThrow {
@@ -198,7 +216,7 @@ class OipKlanttaakEventListenerTest {
         verifyNoInteractions(
             objectManagementServiceMock,
             taskServiceMock,
-            processServiceMock
+            processServiceMock,
         )
     }
 
@@ -208,25 +226,32 @@ class OipKlanttaakEventListenerTest {
         val event = notificatiesApiNotificationReceivedEvent()
 
         doReturn(objectManagementConfiguration())
-            .whenever(objectManagementServiceMock).findByObjectTypeId(eq(objectTypeId()))
+            .whenever(objectManagementServiceMock)
+            .findByObjectTypeId(eq(objectTypeId()))
 
         doReturn(oipKlanttaakPluginConfiguration())
-            .whenever(pluginServiceMock).findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
+            .whenever(pluginServiceMock)
+            .findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
 
         doReturn(objectenApiPlugin())
-            .whenever(pluginServiceMock).createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
 
         doReturn(task())
-            .whenever(taskServiceMock).findTaskById(eq(taskId().toString()))
+            .whenever(taskServiceMock)
+            .findTaskById(eq(taskId().toString()))
 
         doReturn(documentId())
-            .whenever(processDocumentServiceMock).getDocumentId(any(), any())
+            .whenever(processDocumentServiceMock)
+            .getDocumentId(any(), any())
 
         doReturn(oipKlanttaakPlugin())
-            .whenever(pluginServiceMock).createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
 
         doThrow(RuntimeException("Process start failed"))
-            .whenever(processServiceMock).startProcess(any(), any(), any())
+            .whenever(processServiceMock)
+            .startProcess(any(), any(), any())
 
         // when
         assertThrows<NotificatiesNotificationEventException> {
@@ -243,17 +268,22 @@ class OipKlanttaakEventListenerTest {
         val event = notificatiesApiNotificationReceivedEvent()
 
         doReturn(objectManagementConfiguration())
-            .whenever(objectManagementServiceMock).findByObjectTypeId(eq(objectTypeId()))
+            .whenever(objectManagementServiceMock)
+            .findByObjectTypeId(eq(objectTypeId()))
 
         doReturn(oipKlanttaakPluginConfiguration())
-            .whenever(pluginServiceMock).findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
+            .whenever(pluginServiceMock)
+            .findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
 
-        doReturn(objectenApiPlugin(
-            klanttaak = klanttaak(
-                status = Status.VERWERKT
-            )
-        ))
-            .whenever(pluginServiceMock).createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+        doReturn(
+            objectenApiPlugin(
+                klanttaak =
+                    klanttaak(
+                        status = Status.VERWERKT,
+                    ),
+            ),
+        ).whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
 
         // when
         assertDoesNotThrow {
@@ -264,55 +294,64 @@ class OipKlanttaakEventListenerTest {
         verify(taskServiceMock, never()).findTaskById(any())
     }
 
-    private fun notificatiesApiNotificationReceivedEvent() = mock<NotificatiesApiNotificationReceivedEvent> {
-        on { kanaal } doReturn "objecten"
-        on { actie } doReturn "update"
-        on { resourceUrl } doReturn objectUrl().toString()
-        on { kenmerken } doReturn mapOf(
-            "objectType" to objectTypeUrl().toString()
-        )
-    }
+    private fun notificatiesApiNotificationReceivedEvent() =
+        mock<NotificatiesApiNotificationReceivedEvent> {
+            on { kanaal } doReturn "objecten"
+            on { actie } doReturn "update"
+            on { resourceUrl } doReturn objectUrl().toString()
+            on { kenmerken } doReturn
+                mapOf(
+                    "objectType" to objectTypeUrl().toString(),
+                )
+        }
 
-    private fun klanttaak(status: Status = Status.UITGEVOERD) = Klanttaak(
-        titel = "Klanttaak",
-        status = status,
-        eigenaar = "GZAC",
-        betrokkene = Betrokkene(
-            levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
-            authorizee = Authorizee(
-                legalSubject = LegalSubject(identifier = "Authorizee")
-            )
-        ),
-        portaalformulier = Portaalformulier(
-            formulier = Formulier(
-                value = URI.create("https://example.com/form/123")
-            ),
-        ),
-        verwerkerTaakId = taskId()
-    )
+    private fun klanttaak(status: Status = Status.UITGEVOERD) =
+        Klanttaak(
+            titel = "Klanttaak",
+            status = status,
+            eigenaar = "GZAC",
+            betrokkene =
+                Betrokkene(
+                    levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
+                    authorizee =
+                        Authorizee(
+                            legalSubject = LegalSubject(identifier = "Authorizee"),
+                        ),
+                ),
+            portaalformulier =
+                Portaalformulier(
+                    formulier =
+                        Formulier(
+                            value = URI.create("https://example.com/form/123"),
+                        ),
+                ),
+            verwerkerTaakId = taskId(),
+        )
 
     private fun taskId() = UUID.fromString("99ab6902-80a1-46f9-8c79-5c040ebd118f")
 
     private fun processInstanceId() = UUID.fromString("7f7aeaad-604b-470e-b5ee-c8da087c7d0e")
 
-    private fun task() = mock<OperatonTask> {
-        on { id } doReturn taskId().toString()
-        on { getProcessInstanceId() } doReturn processInstanceId().toString()
-    }
+    private fun task() =
+        mock<OperatonTask> {
+            on { id } doReturn taskId().toString()
+            on { getProcessInstanceId() } doReturn processInstanceId().toString()
+        }
 
     private fun documentId() = JsonSchemaDocumentId.existingId(UUID.fromString("466954bd-1d21-4462-a3fb-d7af0b5ddc41"))
 
     private fun oipKlanttaakPluginConfigurationId() = UUID.fromString("5489f080-8355-4f28-a305-5ebd88ecdd22")
 
-    private fun oipKlanttaakPluginConfiguration() = PluginConfiguration(
-        id = PluginConfigurationId.existingId(oipKlanttaakPluginConfigurationId()),
-        title = "OIP Klanttaak Plugin Configuration",
-        pluginDefinition = mock()
-    )
+    private fun oipKlanttaakPluginConfiguration() =
+        PluginConfiguration(
+            id = PluginConfigurationId.existingId(oipKlanttaakPluginConfigurationId()),
+            title = "OIP Klanttaak Plugin Configuration",
+            pluginDefinition = mock(),
+        )
 
     private fun oipKlanttaakPlugin(
         finalizerProcessIsCaseSpecific: Boolean = false,
-        caseDefinitionVersion: String? = null
+        caseDefinitionVersion: String? = null,
     ) = mock<OipKlanttaakPlugin> {
         on { this.finalizerProcessIsCaseSpecific } doReturn finalizerProcessIsCaseSpecific
         on { this.caseDefinitionVersion } doReturn caseDefinitionVersion
@@ -333,29 +372,30 @@ class OipKlanttaakEventListenerTest {
 
     private fun objectUrl() = URI.create("https://example.com/object/${objectId()}")
 
-    private fun objectManagementConfiguration() = ObjectManagement(
-        id = objectManagementConfigurationId(),
-        title = "OIP Klanttaak",
-        objecttypenApiPluginConfigurationId = objecttypenApiPluginConfigurationId(),
-        objecttypeId = objectTypeId(),
-        objectenApiPluginConfigurationId = objectenApiPluginConfigurationId()
-    )
-
-    private fun objectenApiPlugin(
-        klanttaak: Klanttaak = klanttaak()
-    ): ObjectenApiPlugin {
-        val objectWrapper = ObjectWrapper(
-            url = objectUrl(),
-            uuid = objectId(),
-            type = objectTypeUrl(),
-            record = ObjectRecord(
-                typeVersion = 1,
-                startAt = LocalDate.parse("2026-01-01"),
-                data = objectMapper.valueToTree(klanttaak)
-            )
+    private fun objectManagementConfiguration() =
+        ObjectManagement(
+            id = objectManagementConfigurationId(),
+            title = "OIP Klanttaak",
+            objecttypenApiPluginConfigurationId = objecttypenApiPluginConfigurationId(),
+            objecttypeId = objectTypeId(),
+            objectenApiPluginConfigurationId = objectenApiPluginConfigurationId(),
         )
+
+    private fun objectenApiPlugin(klanttaak: Klanttaak = klanttaak()): ObjectenApiPlugin {
+        val objectWrapper =
+            ObjectWrapper(
+                url = objectUrl(),
+                uuid = objectId(),
+                type = objectTypeUrl(),
+                record =
+                    ObjectRecord(
+                        typeVersion = 1,
+                        startAt = LocalDate.parse("2026-01-01"),
+                        data = objectMapper.valueToTree(klanttaak),
+                    ),
+            )
         return mock<ObjectenApiPlugin> {
-            on { getObject(any() ) } doReturn objectWrapper
+            on { getObject(any()) } doReturn objectWrapper
         }
     }
 }

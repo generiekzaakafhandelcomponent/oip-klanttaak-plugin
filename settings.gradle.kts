@@ -1,4 +1,4 @@
-rootProject.name = "gzac-plugin-template"
+rootProject.name = "oip-klanttaak-plugin"
 include(
     "backend",
     "backend:app",

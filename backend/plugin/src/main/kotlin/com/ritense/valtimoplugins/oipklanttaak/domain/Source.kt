@@ -18,6 +18,8 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Source(@JsonValue val value: String) {
+enum class Source(
+    @JsonValue val value: String,
+) {
     DIGID("digid"),
 }

@@ -35,6 +35,18 @@ dependencies {
     compileOnly("io.github.oshai:kotlin-logging:$kotlinLoggingVersion")
 
     // Testing
+    testImplementation("com.ritense.valtimo:contract")
+    testImplementation("com.ritense.valtimo:core")
+    testImplementation("com.ritense.valtimo:objecten-api")
+    testImplementation("com.ritense.valtimo:objecttypen-api")
+    testImplementation("com.ritense.valtimo:object-management")
+    testImplementation("com.ritense.valtimo:plugin-valtimo")
+    testImplementation("com.ritense.valtimo:notificaties-api")
+    testImplementation("com.ritense.valtimo:case")
+    testImplementation("com.ritense.valtimo:process-document")
+    testImplementation("com.ritense.valtimo:value-resolver")
+    testImplementation("com.ritense.valtimo:zaken-api")
+    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito:mockito-core")

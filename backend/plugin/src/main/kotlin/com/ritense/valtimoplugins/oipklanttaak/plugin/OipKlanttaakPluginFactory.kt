@@ -24,14 +24,12 @@ import com.ritense.valtimoplugins.oipklanttaak.service.OipKlanttaakService
 class OipKlanttaakPluginFactory(
     pluginService: PluginService,
     private val objectManagementService: ObjectManagementService,
-    private val oipKlanttaakService: OipKlanttaakService
-): PluginFactory<OipKlanttaakPlugin>(pluginService) {
-
-    override fun create(): OipKlanttaakPlugin {
-        return OipKlanttaakPlugin(
+    private val oipKlanttaakService: OipKlanttaakService,
+) : PluginFactory<OipKlanttaakPlugin>(pluginService) {
+    override fun create(): OipKlanttaakPlugin =
+        OipKlanttaakPlugin(
             pluginService = pluginService,
             objectManagementService = objectManagementService,
-            oipKlanttaakService = oipKlanttaakService
+            oipKlanttaakService = oipKlanttaakService,
         )
-    }
 }

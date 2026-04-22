@@ -33,17 +33,16 @@ import org.springframework.context.annotation.Bean
 
 @AutoConfiguration
 class OipKlanttaakAutoConfiguration {
-
     @Bean
     @ConditionalOnMissingBean(OipKlanttaakPluginFactory::class)
     fun oipKlanttaakPluginFactory(
         pluginService: PluginService,
         objectManagementService: ObjectManagementService,
-        oipKlanttaakService: OipKlanttaakService
+        oipKlanttaakService: OipKlanttaakService,
     ) = OipKlanttaakPluginFactory(
         pluginService = pluginService,
         objectManagementService = objectManagementService,
-        oipKlanttaakService = oipKlanttaakService
+        oipKlanttaakService = oipKlanttaakService,
     )
 
     @Bean
@@ -54,14 +53,14 @@ class OipKlanttaakAutoConfiguration {
         objectMapper: ObjectMapper,
         taskService: OperatonTaskService,
         valueResolverService: ValueResolverService,
-        zaakUrlProvider: ZaakUrlProvider
+        zaakUrlProvider: ZaakUrlProvider,
     ) = OipKlanttaakService(
         pluginService = pluginService,
         objectManagementService = objectManagementService,
         objectMapper = objectMapper,
         taskService = taskService,
         valueResolverService = valueResolverService,
-        zaakUrlProvider = zaakUrlProvider
+        zaakUrlProvider = zaakUrlProvider,
     )
 
     @Bean
@@ -72,13 +71,13 @@ class OipKlanttaakAutoConfiguration {
         objectMapper: ObjectMapper,
         processDocumentService: ProcessDocumentService,
         processService: OperatonProcessService,
-        taskService: OperatonTaskService
+        taskService: OperatonTaskService,
     ) = OipKlanttaakEventListener(
         pluginService = pluginService,
         objectManagementService = objectManagementService,
         objectMapper = objectMapper,
         processDocumentService = processDocumentService,
         processService = processService,
-        taskService = taskService
+        taskService = taskService,
     )
 }

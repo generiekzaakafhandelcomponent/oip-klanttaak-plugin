@@ -30,7 +30,7 @@ internal fun ObjectRecord.copy(
     endAt: LocalDate? = this.endAt,
     registrationAt: LocalDate? = this.registrationAt,
     correctionFor: String? = this.correctionFor,
-    correctedBy: String? = this.correctedBy
+    correctedBy: String? = this.correctedBy,
 ) = ObjectRecord(
     index = index,
     typeVersion = typeVersion,
@@ -40,5 +40,5 @@ internal fun ObjectRecord.copy(
     endAt = endAt,
     registrationAt = registrationAt,
     correctionFor = correctionFor,
-    correctedBy = correctedBy
+    correctedBy = correctedBy,
 )

@@ -18,7 +18,9 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Status(@JsonValue val value: String) {
+enum class Status(
+    @JsonValue val value: String,
+) {
     OPEN("open"),
     UITGEVOERD("uitgevoerd"),
     AFGEBROKEN("afgebroken"),

@@ -18,7 +18,9 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Registratie(@JsonValue val value: String) {
+enum class Registratie(
+    @JsonValue val value: String,
+) {
     ZAAK("zaak"),
     PRODUCT("product"),
 }

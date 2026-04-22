@@ -18,6 +18,8 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Soort(@JsonValue val value: String) {
-    EXTERNFORMULIER("externformulier");
+enum class Soort(
+    @JsonValue val value: String,
+) {
+    EXTERNFORMULIER("externformulier"),
 }

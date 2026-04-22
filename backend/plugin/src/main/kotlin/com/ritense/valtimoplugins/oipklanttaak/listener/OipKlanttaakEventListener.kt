@@ -36,8 +36,8 @@ import com.ritense.valtimo.operaton.domain.OperatonTask
 import com.ritense.valtimo.security.exceptions.TaskNotFoundException
 import com.ritense.valtimo.service.OperatonProcessService
 import com.ritense.valtimo.service.OperatonTaskService
-import com.ritense.valtimoplugins.oipklanttaak.domain.Klanttaak
 import com.ritense.valtimoplugins.oipklanttaak.ProcessVariables
+import com.ritense.valtimoplugins.oipklanttaak.domain.Klanttaak
 import com.ritense.valtimoplugins.oipklanttaak.domain.Status
 import com.ritense.valtimoplugins.oipklanttaak.plugin.OipKlanttaakPlugin
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -52,9 +52,8 @@ open class OipKlanttaakEventListener(
     private val objectMapper: ObjectMapper,
     private val processDocumentService: ProcessDocumentService,
     private val processService: OperatonProcessService,
-    private val taskService: OperatonTaskService
+    private val taskService: OperatonTaskService,
 ) {
-
     @Transactional
     @RunWithoutAuthorization
     @EventListener(NotificatiesApiNotificationReceivedEvent::class)
@@ -66,7 +65,7 @@ open class OipKlanttaakEventListener(
                 oipKlanttaakPluginConfigurationFor(objectManagement)?.let { oipKlanttaakPluginConfiguration ->
                     operatonTaskFor(
                         resourceUrl = event.resourceUrl,
-                        objectenApiPluginConfigurationId = objectManagement.objectenApiPluginConfigurationId
+                        objectenApiPluginConfigurationId = objectManagement.objectenApiPluginConfigurationId,
                     )?.let { operatonTask ->
                         logger.info {
                             "Trying to handle Klanttaak using plugin configuration with id '${oipKlanttaakPluginConfiguration.id}'"
@@ -74,7 +73,7 @@ open class OipKlanttaakEventListener(
                         handleTaskFor(
                             resourceUrl = event.resourceUrl,
                             operatonTask = operatonTask,
-                            oipKlanttaakPluginConfiguration = oipKlanttaakPluginConfiguration
+                            oipKlanttaakPluginConfiguration = oipKlanttaakPluginConfiguration,
                         )
                     }
                 }
@@ -84,23 +83,23 @@ open class OipKlanttaakEventListener(
 
     private fun eventMatchesCompleteTaskCriteria(event: NotificatiesApiNotificationReceivedEvent): Boolean =
         (
-            objectTypeFrom(event) != null
-            &&
-            event.kanaal.equals("objecten", ignoreCase = true)
-            &&
-            event.actie.equals("update", ignoreCase = true)
+            objectTypeFrom(event) != null &&
+                event.kanaal.equals("objecten", ignoreCase = true) &&
+                event.actie.equals("update", ignoreCase = true)
         ).also {
             if (!it) {
                 logger.info {
                     "Skipping: Event does not match criteria to complete an OIP Task. " +
-                        "(objectType(=${objectTypeFrom(event)}) != null, kanaal(=${event.kanaal}) == 'objecten', actie(=${event.actie}) == 'update')"
+                        "(objectType(=${objectTypeFrom(
+                            event,
+                        )}) != null, kanaal(=${event.kanaal}) == 'objecten', actie(=${event.actie}) == 'update')"
                 }
             }
         }
 
     private fun operatonTaskFor(
         resourceUrl: String,
-        objectenApiPluginConfigurationId: UUID
+        objectenApiPluginConfigurationId: UUID,
     ): OperatonTask? =
         getObjectByUrl(resourceUrl, objectenApiPluginConfigurationId).let { objectWrapper ->
             objectMapper.convertValue<Klanttaak>(objectWrapper.record.data).let { klanttaak ->
@@ -126,66 +125,74 @@ open class OipKlanttaakEventListener(
         operatonTask: OperatonTask,
         oipKlanttaakPluginConfiguration: PluginConfiguration,
     ) {
-        pluginService.createInstance<OipKlanttaakPlugin>(oipKlanttaakPluginConfiguration.id.id).let { oipKlanttaakPlugin ->
-            val documentId = AuthorizationContext.runWithoutAuthorization {
-                processDocumentService.getDocumentId(
-                    OperatonProcessInstanceId(operatonTask.getProcessInstanceId()),
-                    operatonTask
+        pluginService
+            .createInstance<OipKlanttaakPlugin>(oipKlanttaakPluginConfiguration.id.id)
+            .let { oipKlanttaakPlugin ->
+                val documentId =
+                    AuthorizationContext.runWithoutAuthorization {
+                        processDocumentService.getDocumentId(
+                            OperatonProcessInstanceId(operatonTask.getProcessInstanceId()),
+                            operatonTask,
+                        )
+                    }
+                logger.debug { "Starting finalizer process for Klanttaak with verwerker-taak-id '${operatonTask.id}'" }
+                startFinalizerProcess(
+                    caseDefinitionId = caseDefinitionIdFrom(oipKlanttaakPlugin),
+                    processDefinitionKey = oipKlanttaakPlugin.finalizerProcess,
+                    businessKey = documentId.id.toString(),
+                    variables =
+                        mapOf(
+                            ProcessVariables.VERWERKER_TAAK_ID to operatonTask.id,
+                            ProcessVariables.KLANTTAAK_OBJECT_URL to resourceUrl,
+                        ),
                 )
             }
-            logger.debug { "Starting finalizer process for Klanttaak with verwerker-taak-id '${operatonTask.id}'" }
-            startFinalizerProcess(
-                caseDefinitionId = caseDefinitionIdFrom(oipKlanttaakPlugin),
-                processDefinitionKey = oipKlanttaakPlugin.finalizerProcess,
-                businessKey = documentId.id.toString(),
-                variables = mapOf(
-                    ProcessVariables.VERWERKER_TAAK_ID to operatonTask.id,
-                    ProcessVariables.KLANTTAAK_OBJECT_URL to resourceUrl
-                )
-            )
-        }
     }
 
     private fun startFinalizerProcess(
         caseDefinitionId: CaseDefinitionId? = null,
         processDefinitionKey: String,
         businessKey: String,
-        variables: Map<String, Any>
+        variables: Map<String, Any>,
     ) {
         try {
             AuthorizationContext.runWithoutAuthorization {
                 if (caseDefinitionId != null) {
-                    processService.startProcess(
-                        processDefinitionKey,
-                        businessKey,
-                        caseDefinitionId,
-                        variables
-                    ).also {
-                        logger.info {
-                            "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
-                                "CaseDefinition(id=${caseDefinitionId}), " +
-                                "ProcessDefinition(key=$processDefinitionKey) and " +
-                                "Document(id=$businessKey)"
+                    processService
+                        .startProcess(
+                            processDefinitionKey,
+                            businessKey,
+                            caseDefinitionId,
+                            variables,
+                        ).also {
+                            logger.info {
+                                "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
+                                    "CaseDefinition(id=$caseDefinitionId), " +
+                                    "ProcessDefinition(key=$processDefinitionKey) and " +
+                                    "Document(id=$businessKey)"
+                            }
                         }
-                    }
                 } else {
-                    processService.startProcess(
-                        processDefinitionKey,
-                        businessKey,
-                        variables
-                    ).also {
-                        logger.info {
-                            "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
-                                "ProcessDefinition(key=$processDefinitionKey) and " +
-                                "Document(id=$businessKey)"
+                    processService
+                        .startProcess(
+                            processDefinitionKey,
+                            businessKey,
+                            variables,
+                        ).also {
+                            logger.info {
+                                "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
+                                    "ProcessDefinition(key=$processDefinitionKey) and " +
+                                    "Document(id=$businessKey)"
+                            }
                         }
-                    }
                 }
             }
         } catch (ex: RuntimeException) {
             throw NotificatiesNotificationEventException(
-                "Could not start ProcessInstance from ProcessDefinition(key=$processDefinitionKey) and businessKey: $businessKey.\n" +
-                    "Reason: ${ex.message}"
+                "Could not start ProcessInstance from " +
+                    "ProcessDefinition(key=$processDefinitionKey) " +
+                    "and businessKey: $businessKey.\n" +
+                    "Reason: ${ex.message}",
             )
         }
     }
@@ -196,10 +203,12 @@ open class OipKlanttaakEventListener(
             plugin.caseDefinitionVersion.let {
                 CaseDefinitionId.of(
                     key = it!!.substringBefore(":"),
-                    versionTag = it.substringAfter(":")
+                    versionTag = it.substringAfter(":"),
                 )
             }
-        } else null
+        } else {
+            null
+        }
 
     private fun objectManagementFor(event: NotificatiesApiNotificationReceivedEvent): ObjectManagement? =
         objectTypeFrom(event).let { objectType ->
@@ -207,28 +216,34 @@ open class OipKlanttaakEventListener(
             objectType.substringAfterLast("/").let { objectTypeId ->
                 objectManagementService.findByObjectTypeId(objectTypeId).also {
                     if (it == null) {
-                        logger.warn { "Skipping: Object management configuration not found for object type id '$objectTypeId'" }
+                        logger.warn {
+                            "Skipping: Object management configuration not found for object type id '$objectTypeId'"
+                        }
                     }
                 }
             }
         }
 
     private fun oipKlanttaakPluginConfigurationFor(objectManagement: ObjectManagement): PluginConfiguration? =
-        pluginService.findPluginConfiguration(OipKlanttaakPlugin::class.java) { properties: JsonNode ->
-            properties.get(OBJECT_MANAGEMENT_CONFIGURATION_ID).textValue().equals(objectManagement.id.toString())
-        }.also {
-            if (it == null) {
-                logger.warn {
-                    "Skipping: No Klanttaak plugin configuration found for object management with id '${objectManagement.id}'"
+        pluginService
+            .findPluginConfiguration(OipKlanttaakPlugin::class.java) { properties: JsonNode ->
+                properties.get(OBJECT_MANAGEMENT_CONFIGURATION_ID).textValue().equals(objectManagement.id.toString())
+            }.also {
+                if (it == null) {
+                    logger.warn {
+                        "Skipping: No Klanttaak plugin configuration found for object management with id '${objectManagement.id}'"
+                    }
                 }
             }
-        }
 
-    private fun objectTypeFrom(event: NotificatiesApiNotificationReceivedEvent): String? =
-        event.kenmerken["objectType"]
+    private fun objectTypeFrom(event: NotificatiesApiNotificationReceivedEvent): String? = event.kenmerken["objectType"]
 
-    private fun getObjectByUrl(url: String, objectenApiPluginConfigurationId: UUID): ObjectWrapper =
-        pluginService.createInstance<ObjectenApiPlugin>(objectenApiPluginConfigurationId)
+    private fun getObjectByUrl(
+        url: String,
+        objectenApiPluginConfigurationId: UUID,
+    ): ObjectWrapper =
+        pluginService
+            .createInstance<ObjectenApiPlugin>(objectenApiPluginConfigurationId)
             .getObject(URI.create(url))
 
     companion object {

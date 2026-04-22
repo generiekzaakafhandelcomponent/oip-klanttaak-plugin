@@ -18,7 +18,9 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class Vertrouwelijkheidaanduiding(@JsonValue val value: String) {
+enum class Vertrouwelijkheidaanduiding(
+    @JsonValue val value: String,
+) {
     OPENBAAR("openbaar"),
     INTERN("intern"),
     VERTROUWELIJK("vertrouwelijk"),

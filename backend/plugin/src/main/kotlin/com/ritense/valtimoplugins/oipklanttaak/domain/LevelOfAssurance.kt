@@ -18,7 +18,9 @@ package com.ritense.valtimoplugins.oipklanttaak.domain
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class LevelOfAssurance(@JsonValue val value: String) {
+enum class LevelOfAssurance(
+    @JsonValue val value: String,
+) {
     PASSWORD_PROTECTED_TRANSPORT("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"),
     MOBILE_TWO_FACTOR_CONTRACT("urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract"),
     SMARTCARD("urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard"),
