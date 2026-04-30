@@ -115,11 +115,11 @@ class OipKlanttaakPlugin(
                 formDataMapping = formulierDataMapping,
                 description = toelichting,
                 koppeling =
-                    koppelingRegistratie?.let {
+                    koppelingRegistratie?.let { registratieValue ->
                         Koppeling(
                             registratie =
                                 Registratie.entries.single {
-                                    it.value == koppelingRegistratie || it.name == koppelingRegistratie
+                                    it.value == registratieValue || it.name == registratieValue
                                 },
                             value = UUID.fromString(koppelingIdentifier!!),
                         )
@@ -179,16 +179,31 @@ class OipKlanttaakPlugin(
             ) as ObjecttypenApiPlugin
 
         return listOf(
-            Abonnement.Kanaal(
-                naam = KANAAL_OBJECTEN,
-                filters =
-                    mapOf(
-                        OBJECT_TYPE to "${objecttypenApiPlugin.url}objecttypes/${objectManagement.objecttypeId}",
-                        ACTIE to UPDATE,
-                    ),
+            kanaal(
+                objecttypenApiPluginUrl = objecttypenApiPlugin.url,
+                objecttypeId = objectManagement.objecttypeId,
+                actie = UPDATE
             ),
+            kanaal(
+                objecttypenApiPluginUrl = objecttypenApiPlugin.url,
+                objecttypeId = objectManagement.objecttypeId,
+                actie = PARTIAL_UPDATE
+            )
         )
     }
+
+    private fun kanaal(
+        objecttypenApiPluginUrl: URI,
+        objecttypeId: String,
+        actie: String
+    ) = Abonnement.Kanaal(
+        naam = KANAAL_OBJECTEN,
+        filters =
+            mapOf(
+                OBJECT_TYPE to "${objecttypenApiPluginUrl}objecttypes/${objecttypeId}",
+                ACTIE to actie,
+            ),
+    )
 
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -197,5 +212,6 @@ class OipKlanttaakPlugin(
         private const val OBJECT_TYPE = "objectType"
         private const val ACTIE = "actie"
         private const val UPDATE = "update"
+        private const val PARTIAL_UPDATE = "partial_update"
     }
 }
