@@ -198,11 +198,83 @@ class OipKlanttaakEventListenerTest {
     }
 
     @Test
-    fun `handle should skip event if criteria do not match`() {
+    fun `handle should process valid partial_update event and start a system process when task is found`() {
+        // given
+        val event = notificatiesApiNotificationReceivedEvent(actie = "partial_update")
+
+        doReturn(objectManagementConfiguration())
+            .whenever(objectManagementServiceMock)
+            .findByObjectTypeId(eq(objectTypeId()))
+
+        doReturn(oipKlanttaakPluginConfiguration())
+            .whenever(pluginServiceMock)
+            .findPluginConfiguration<OipKlanttaakPlugin>(any(), any())
+
+        doReturn(objectenApiPlugin())
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+
+        doReturn(task())
+            .whenever(taskServiceMock)
+            .findTaskById(eq(taskId().toString()))
+
+        doReturn(documentId())
+            .whenever(processDocumentServiceMock)
+            .getDocumentId(any(), any())
+
+        doReturn(oipKlanttaakPlugin())
+            .whenever(pluginServiceMock)
+            .createInstance<OipKlanttaakPlugin>(eq(oipKlanttaakPluginConfigurationId()))
+
+        // when
+        AuthorizationContext.runWithoutAuthorization<Any> {
+            assertDoesNotThrow {
+                listener.handle(event)
+            }
+        }
+
+        // then
+        verify(processServiceMock, times(1)).startProcess(
+            any(),
+            any(),
+            eq(
+                mapOf(
+                    ProcessVariables.VERWERKER_TAAK_ID to taskId().toString(),
+                    ProcessVariables.KLANTTAAK_OBJECT_URL to objectUrl().toString(),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `handle should skip event if kanaal does not match`() {
         // given
         val event =
             mock<NotificatiesApiNotificationReceivedEvent> {
                 on { kanaal } doReturn "other"
+                on { actie } doReturn "update"
+                on { kenmerken } doReturn mapOf("objectType" to "https://example.com/objectType")
+            }
+
+        // when
+        assertDoesNotThrow {
+            listener.handle(event)
+        }
+
+        // then
+        verifyNoInteractions(
+            objectManagementServiceMock,
+            taskServiceMock,
+            processServiceMock,
+        )
+    }
+
+    @Test
+    fun `handle should skip event if actie is not update or partial_update`() {
+        // given
+        val event =
+            mock<NotificatiesApiNotificationReceivedEvent> {
+                on { kanaal } doReturn "objecten"
                 on { actie } doReturn "create"
                 on { kenmerken } doReturn mapOf("objectType" to "https://example.com/objectType")
             }
@@ -294,10 +366,10 @@ class OipKlanttaakEventListenerTest {
         verify(taskServiceMock, never()).findTaskById(any())
     }
 
-    private fun notificatiesApiNotificationReceivedEvent() =
+    private fun notificatiesApiNotificationReceivedEvent(actie: String = "update") =
         mock<NotificatiesApiNotificationReceivedEvent> {
             on { kanaal } doReturn "objecten"
-            on { actie } doReturn "update"
+            on { this.actie } doReturn actie
             on { resourceUrl } doReturn objectUrl().toString()
             on { kenmerken } doReturn
                 mapOf(
