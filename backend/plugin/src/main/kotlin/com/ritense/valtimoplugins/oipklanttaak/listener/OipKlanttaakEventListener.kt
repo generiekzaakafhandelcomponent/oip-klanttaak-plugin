@@ -107,25 +107,21 @@ open class OipKlanttaakEventListener(
     private fun operatonTaskFor(
         resourceUrl: String,
         objectenApiPluginConfigurationId: UUID,
-    ): OperatonTask? =
-        getObjectByUrl(resourceUrl, objectenApiPluginConfigurationId).let { objectWrapper ->
-            objectMapper.convertValue<Klanttaak>(objectWrapper.record.data).let { klanttaak ->
-                if (klanttaak.status != Status.UITGEVOERD) {
-                    logger.info {
-                        "Skipping: Klanttaak cannot be handled. Does not match expected status UITGEVOERD."
-                    }
-                    return null
-                }
-                return try {
-                    taskService.findTaskById(klanttaak.verwerkerTaakId.toString())
-                } catch (_: TaskNotFoundException) {
-                    logger.info {
-                        "Skipping: No OperatonTask found with id '${klanttaak.verwerkerTaakId}'."
-                    }
-                    null
-                }
-            }
+    ): OperatonTask? {
+        val klanttaak = objectMapper.convertValue<Klanttaak>(
+            getObjectByUrl(resourceUrl, objectenApiPluginConfigurationId).record.data,
+        )
+        if (klanttaak.status != Status.UITGEVOERD) {
+            logger.info { "Skipping: Klanttaak cannot be handled. Does not match expected status UITGEVOERD." }
+            return null
         }
+        return try {
+            taskService.findTaskById(klanttaak.verwerkerTaakId.toString())
+        } catch (_: TaskNotFoundException) {
+            logger.info { "Skipping: No OperatonTask found with id '${klanttaak.verwerkerTaakId}'." }
+            null
+        }
+    }
 
     private fun handleTaskFor(
         resourceUrl: String,

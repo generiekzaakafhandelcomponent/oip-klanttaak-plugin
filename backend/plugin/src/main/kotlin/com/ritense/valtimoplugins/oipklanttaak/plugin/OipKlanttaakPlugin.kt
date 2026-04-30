@@ -115,11 +115,11 @@ class OipKlanttaakPlugin(
                 formDataMapping = formulierDataMapping,
                 description = toelichting,
                 koppeling =
-                    koppelingRegistratie?.let {
+                    koppelingRegistratie?.let { registratieValue ->
                         Koppeling(
                             registratie =
                                 Registratie.entries.single {
-                                    it.value == koppelingRegistratie || it.name == koppelingRegistratie
+                                    it.value == registratieValue || it.name == registratieValue
                                 },
                             value = UUID.fromString(koppelingIdentifier!!),
                         )
