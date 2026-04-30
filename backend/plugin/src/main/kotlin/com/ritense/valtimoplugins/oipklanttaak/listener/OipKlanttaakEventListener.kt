@@ -83,16 +83,23 @@ open class OipKlanttaakEventListener(
 
     private fun eventMatchesCompleteTaskCriteria(event: NotificatiesApiNotificationReceivedEvent): Boolean =
         (
-            objectTypeFrom(event) != null &&
-                event.kanaal.equals("objecten", ignoreCase = true) &&
-                event.actie.equals("update", ignoreCase = true)
+            objectTypeFrom(event) != null
+            &&
+            event.kanaal.equals(KANAAL_OBJECTEN, ignoreCase = true) &&
+            (
+                event.actie.equals(ACTIE_UPDATE, ignoreCase = true)
+                ||
+                event.actie.equals(ACTIE_PARTIAL_UPDATE, ignoreCase = true)
+            )
         ).also {
             if (!it) {
                 logger.info {
                     "Skipping: Event does not match criteria to complete an OIP Task. " +
-                        "(objectType(=${objectTypeFrom(
-                            event,
-                        )}) != null, kanaal(=${event.kanaal}) == 'objecten', actie(=${event.actie}) == 'update')"
+                    "(" +
+                        "objectType(=${objectTypeFrom(event)}) != null, " +
+                        "kanaal(=${event.kanaal}) == '$KANAAL_OBJECTEN', " +
+                        "actie(=${event.actie}) == '$ACTIE_UPDATE' | '$ACTIE_PARTIAL_UPDATE'" +
+                    ")"
                 }
             }
         }
@@ -250,5 +257,8 @@ open class OipKlanttaakEventListener(
         private val logger = KotlinLogging.logger {}
 
         private const val OBJECT_MANAGEMENT_CONFIGURATION_ID = "objectManagementConfigurationId"
+        private const val KANAAL_OBJECTEN = "objecten"
+        private const val ACTIE_UPDATE = "update"
+        private const val ACTIE_PARTIAL_UPDATE = "partial_update"
     }
 }
