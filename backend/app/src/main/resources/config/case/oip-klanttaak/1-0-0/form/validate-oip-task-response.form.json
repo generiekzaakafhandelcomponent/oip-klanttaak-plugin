@@ -1,0 +1,108 @@
+{
+  "display": "form",
+  "components": [
+    {
+      "label": "HTML",
+      "tag": "h4",
+      "content": "Case/document data",
+      "key": "html",
+      "type": "htmlelement",
+      "input": false
+    },
+    {
+      "key": "doc-volledigeNaam",
+      "type": "textfield",
+      "input": true,
+      "label": "Volledige naam",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "doc:/volledigeNaam"
+      }
+    },
+    {
+      "key": "doc-voornaam",
+      "type": "textfield",
+      "input": true,
+      "label": "Voornaam",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "doc:/voornaam"
+      }
+    },
+    {
+      "key": "doc-tussenvoegsel",
+      "type": "textfield",
+      "input": true,
+      "label": "Tussenvoegsel",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "doc:/tussenvoegsel"
+      }
+    },
+    {
+      "key": "doc-achternaam",
+      "type": "textfield",
+      "input": true,
+      "label": "Achternaam",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "doc:/achternaam"
+      }
+    },
+    {
+      "key": "doc-emailadres",
+      "type": "textfield",
+      "input": true,
+      "label": "E-mailadres",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "doc:/emailadres"
+      }
+    },
+    {
+      "label": "HTML",
+      "tag": "h4",
+      "content": "Proces variabelen",
+      "key": "html",
+      "type": "htmlelement",
+      "input": false
+    },
+    {
+      "key": "pv-emailAdres",
+      "type": "textfield",
+      "input": true,
+      "label": "E-mailadres",
+      "disabled": true,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "pv:emailAdres"
+      }
+    },
+    {
+      "key": "pv-uploadDocumenten",
+      "type": "textarea",
+      "input": true,
+      "label": "Geüploade documenten",
+      "disabled": true,
+      "rows": 5,
+      "autoExpand": false,
+      "persistent": "client-only",
+      "properties": {
+        "sourceKey": "pv:uploadDocumenten"
+      }
+    },
+    {
+      "key": "submit",
+      "type": "button",
+      "input": true,
+      "label": "Submit",
+      "tableView": false,
+      "disableOnInvalid": true
+    }
+  ]
+}

@@ -231,11 +231,11 @@ class OipKlanttaakService(
                                         // extract data from submitted data and map to document
                                         receivedDataMapping
                                             .associate {
-                                                it.value to
-                                                    receivedDataNode.at(JsonPointer.valueOf(it.key))
+                                                it.value to receivedDataNode.at(JsonPointer.valueOf(it.key))
                                             }.let { resolvedData ->
                                                 valueResolverService.handleValues(
-                                                    documentId = UUID.fromString(execution.businessKey),
+                                                    processInstanceId = execution.processInstanceId,
+                                                    variableScope = execution,
                                                     values = resolvedData,
                                                 )
                                             }
