@@ -131,23 +131,21 @@ open class OipKlanttaakEventListener(
         pluginService
             .createInstance<OipKlanttaakPlugin>(oipKlanttaakPluginConfiguration.id.id)
             .let { oipKlanttaakPlugin ->
-                val documentId =
-                    AuthorizationContext.runWithoutAuthorization {
-                        processDocumentService.getDocumentId(
-                            OperatonProcessInstanceId(operatonTask.getProcessInstanceId()),
-                            operatonTask,
-                        )
-                    }
+                val documentId = AuthorizationContext.runWithoutAuthorization {
+                    processDocumentService.getDocumentId(
+                        OperatonProcessInstanceId(operatonTask.getProcessInstanceId()),
+                        operatonTask,
+                    )
+                }
                 logger.debug { "Starting finalizer process for Klanttaak with verwerker-taak-id '${operatonTask.id}'" }
                 startFinalizerProcess(
                     caseDefinitionId = caseDefinitionIdFrom(oipKlanttaakPlugin),
                     processDefinitionKey = oipKlanttaakPlugin.finalizerProcess,
                     businessKey = documentId.id.toString(),
-                    variables =
-                        mapOf(
-                            ProcessVariables.VERWERKER_TAAK_ID to operatonTask.id,
-                            ProcessVariables.KLANTTAAK_OBJECT_URL to resourceUrl,
-                        ),
+                    variables = mapOf(
+                        ProcessVariables.VERWERKER_TAAK_ID to operatonTask.id,
+                        ProcessVariables.KLANTTAAK_OBJECT_URL to resourceUrl,
+                    ),
                 )
             }
     }
@@ -161,33 +159,31 @@ open class OipKlanttaakEventListener(
         try {
             AuthorizationContext.runWithoutAuthorization {
                 if (caseDefinitionId != null) {
-                    processService
-                        .startProcess(
-                            processDefinitionKey,
-                            businessKey,
-                            caseDefinitionId,
-                            variables,
-                        ).also {
-                            logger.info {
-                                "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
-                                    "CaseDefinition(id=$caseDefinitionId), " +
-                                    "ProcessDefinition(key=$processDefinitionKey) and " +
-                                    "Document(id=$businessKey)"
-                            }
+                    processService.startProcess(
+                        processDefinitionKey,
+                        businessKey,
+                        caseDefinitionId,
+                        variables,
+                    ).also {
+                        logger.info {
+                            "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
+                                "CaseDefinition(id=$caseDefinitionId), " +
+                                "ProcessDefinition(key=$processDefinitionKey) and " +
+                                "Document(id=$businessKey)"
                         }
+                    }
                 } else {
-                    processService
-                        .startProcess(
-                            processDefinitionKey,
-                            businessKey,
-                            variables,
-                        ).also {
-                            logger.info {
-                                "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
-                                    "ProcessDefinition(key=$processDefinitionKey) and " +
-                                    "Document(id=$businessKey)"
-                            }
+                    processService.startProcess(
+                        processDefinitionKey,
+                        businessKey,
+                        variables,
+                    ).also {
+                        logger.info {
+                            "Started ProcessInstance(id=${it.processInstanceDto.id}) successfully for " +
+                                "ProcessDefinition(key=$processDefinitionKey) and " +
+                                "Document(id=$businessKey)"
                         }
+                    }
                 }
             }
         } catch (ex: RuntimeException) {
@@ -244,10 +240,9 @@ open class OipKlanttaakEventListener(
     private fun getObjectByUrl(
         url: String,
         objectenApiPluginConfigurationId: UUID,
-    ): ObjectWrapper =
-        pluginService
-            .createInstance<ObjectenApiPlugin>(objectenApiPluginConfigurationId)
-            .getObject(URI.create(url))
+    ): ObjectWrapper = pluginService
+        .createInstance<ObjectenApiPlugin>(objectenApiPluginConfigurationId)
+        .getObject(URI.create(url))
 
     companion object {
         private val logger = KotlinLogging.logger {}
