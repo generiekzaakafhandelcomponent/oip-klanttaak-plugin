@@ -36,7 +36,6 @@ import com.ritense.valtimoplugins.oipklanttaak.ProcessVariables
 import com.ritense.valtimoplugins.oipklanttaak.domain.Authorizee
 import com.ritense.valtimoplugins.oipklanttaak.domain.Betrokkene
 import com.ritense.valtimoplugins.oipklanttaak.domain.Formulier
-import com.ritense.valtimoplugins.oipklanttaak.domain.InformatieObject
 import com.ritense.valtimoplugins.oipklanttaak.domain.Klanttaak
 import com.ritense.valtimoplugins.oipklanttaak.domain.Koppeling
 import com.ritense.valtimoplugins.oipklanttaak.domain.LegalSubject
@@ -77,7 +76,7 @@ class OipKlanttaakService(
         description: String? = null,
         koppeling: Koppeling? = null,
         leadTime: Period? = null,
-        deadlineExtendable: Boolean? = null,
+        deadlineExtendable: Boolean? = null
     ) {
         objectManagementById(objectManagementId).let { objectManagement ->
             objectTypenApiPluginByPluginConfigurationId(objectManagement.objecttypenApiPluginConfigurationId)
@@ -87,52 +86,44 @@ class OipKlanttaakService(
                         .createObject(
                             ObjectRequest(
                                 type = objectTypeUrl,
-                                record =
-                                    ObjectRecord(
-                                        typeVersion = objectManagement.objecttypeVersion,
-                                        data =
-                                            objectMapper.convertValue(
-                                                Klanttaak(
-                                                    titel = delegateTask.name,
-                                                    status = Status.OPEN,
-                                                    eigenaar = taskOwner,
-                                                    betrokkene =
-                                                        Betrokkene(
-                                                            levelOfAssurance = levelOfAssurance,
-                                                            authorizee =
-                                                                Authorizee(
-                                                                    legalSubject =
-                                                                        LegalSubject(
-                                                                            identifier = authorizeeIdentifier,
-                                                                        ),
-                                                                ),
-                                                        ),
-                                                    portaalformulier =
-                                                        Portaalformulier(
-                                                            formulier =
-                                                                Formulier(
-                                                                    value = formUri,
-                                                                ),
-                                                            data =
-                                                                formDataMapping?.let {
-                                                                    resolveTaakData(
-                                                                        delegateTask = delegateTask,
-                                                                        formDataMapping = it,
-                                                                    )
-                                                                },
-                                                            verzondenData = emptyMap(),
-                                                        ),
-                                                    verwerkerTaakId = UUID.fromString(delegateTask.id),
-                                                    koppeling = koppeling,
-                                                    toelichting = description,
-                                                    doorlooptijd = leadTime,
-                                                    verloopdatum = expirationDate,
-                                                    deadlineVerlengbaar = deadlineExtendable,
-                                                ),
+                                record = ObjectRecord(
+                                    typeVersion = objectManagement.objecttypeVersion,
+                                    data = objectMapper.convertValue(
+                                        Klanttaak(
+                                            titel = delegateTask.name,
+                                            status = Status.OPEN,
+                                            eigenaar = taskOwner,
+                                            betrokkene = Betrokkene(
+                                                levelOfAssurance = levelOfAssurance,
+                                                authorizee = Authorizee(
+                                                    legalSubject = LegalSubject(
+                                                        identifier = authorizeeIdentifier
+                                                    )
+                                                )
                                             ),
-                                        startAt = LocalDate.now(),
+                                            portaalformulier = Portaalformulier(
+                                                formulier = Formulier(
+                                                    value = formUri
+                                                ),
+                                                data = formDataMapping?.let {
+                                                    resolveTaakData(
+                                                        delegateTask = delegateTask,
+                                                        formDataMapping = it
+                                                    )
+                                                },
+                                                verzondenData = emptyMap()
+                                            ),
+                                            verwerkerTaakId = UUID.fromString(delegateTask.id),
+                                            koppeling = koppeling,
+                                            toelichting = description,
+                                            doorlooptijd = leadTime,
+                                            verloopdatum = expirationDate,
+                                            deadlineVerlengbaar = deadlineExtendable
+                                        ),
                                     ),
-                            ),
+                                    startAt = LocalDate.now()
+                                )
+                            )
                         ).also {
                             logger.info {
                                 "Klanttaak object with UUID '${it.uuid}' and URL '${it.url}' created for " +
@@ -145,7 +136,7 @@ class OipKlanttaakService(
 
     private fun resolveTaakData(
         delegateTask: DelegateTask,
-        formDataMapping: List<DataBinding>,
+        formDataMapping: List<DataBinding>
     ): Map<String, Any> {
         valueResolverService
             .resolveValues(
@@ -187,7 +178,7 @@ class OipKlanttaakService(
         saveReceivedData: Boolean,
         receivedDataMapping: List<DataBinding>? = null,
         linkDocuments: Boolean,
-        pathToDocuments: String? = null,
+        pathToDocuments: String? = null
     ) {
         val verwerkerTaakId = execution.getVariableAsString(ProcessVariables.VERWERKER_TAAK_ID)
         val klanttaakObjectUrl = execution.getVariableAsURI(ProcessVariables.KLANTTAAK_OBJECT_URL)
@@ -228,15 +219,15 @@ class OipKlanttaakService(
                                         logger.debug { "Saving received data to document" }
                                         requireNotNull(receivedDataMapping) { "Received data mapping is null" }
                                         require(receivedDataMapping.isNotEmpty()) { "Received data mapping is empty" }
-                                        // extract data from submitted data and map to document
+                                        // extract data from submitted data and persist via value resolver
                                         receivedDataMapping
                                             .associate {
-                                                it.value to
-                                                    receivedDataNode.at(JsonPointer.valueOf(it.key))
+                                                it.value to receivedDataNode.at(JsonPointer.valueOf(it.key))
                                             }.let { resolvedData ->
                                                 valueResolverService.handleValues(
-                                                    documentId = UUID.fromString(execution.businessKey),
-                                                    values = resolvedData,
+                                                    processInstanceId = execution.processInstanceId,
+                                                    variableScope = execution,
+                                                    values = resolvedData
                                                 )
                                             }
                                     }
@@ -245,28 +236,21 @@ class OipKlanttaakService(
                                         logger.debug { "Linking documents to zaak" }
                                         requireNotNull(pathToDocuments) { "Path to documents is null" }
                                         require(pathToDocuments.isNotBlank()) { "Path to documents is blank" }
-                                        receivedDataNode
-                                            .at(JsonPointer.valueOf(pathToDocuments))
+                                        receivedDataNode.at(JsonPointer.valueOf(pathToDocuments))
                                             .let { documentsNode ->
                                                 if (documentsNode.isArray) {
-                                                    zakenApiPluginByDocumentId(
-                                                        UUID.fromString(execution.businessKey),
-                                                    ).let { zakenApiPlugin ->
-                                                        documentsNode.forEach { documentNode ->
-                                                            objectMapper
-                                                                .convertValue<InformatieObject>(
-                                                                    documentNode,
-                                                                ).let { informatieObject ->
+                                                    zakenApiPluginByDocumentId(UUID.fromString(execution.businessKey))
+                                                        .let { zakenApiPlugin ->
+                                                            documentsNode
+                                                                .mapNotNull { it.textValue() }
+                                                                .forEach { documentUrl ->
                                                                     zakenApiPlugin.linkDocumentToZaak(
                                                                         execution = execution,
-                                                                        documentUrl =
-                                                                            informatieObject.informatieobject
-                                                                                .toASCIIString(),
-                                                                        titel = informatieObject.titel,
-                                                                        beschrijving = informatieObject.omschrijving,
+                                                                        documentUrl = documentUrl,
+                                                                        titel = null,
+                                                                        beschrijving = null
                                                                     )
                                                                 }
-                                                        }
                                                     }
                                                 }
                                             }
@@ -275,21 +259,19 @@ class OipKlanttaakService(
                         }
 
                         klanttaak.copy(status = Status.VERWERKT).let { modifiedOipTask ->
-                            objectenApiPlugin
-                                .objectPatch(
-                                    klanttaakObjectUrl,
-                                    ObjectRequest(
-                                        type = objectWrapper.type,
-                                        record =
-                                            objectWrapper.record.copy(
-                                                data = objectMapper.convertValue(modifiedOipTask),
-                                            ),
-                                    ),
-                                ).also {
-                                    logger.info {
-                                        "Klanttaak object with URL '$klanttaakObjectUrl' completed by changing status to '${Status.VERWERKT.name}'"
-                                    }
+                            objectenApiPlugin.objectPatch(
+                                objectUrl = klanttaakObjectUrl,
+                                objectRequest = ObjectRequest(
+                                    type = objectWrapper.type,
+                                    record = objectWrapper.record.copy(
+                                        data = objectMapper.convertValue(modifiedOipTask),
+                                    )
+                                )
+                            ).also {
+                                logger.info {
+                                    "Klanttaak object with URL '$klanttaakObjectUrl' completed by changing status to '${Status.VERWERKT.name}'"
                                 }
+                            }
                         }
                     }
                 }

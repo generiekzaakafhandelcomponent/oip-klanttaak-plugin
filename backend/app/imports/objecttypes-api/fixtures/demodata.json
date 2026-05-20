@@ -2185,7 +2185,8 @@
                                     "upload_documenten": {
                                         "type": "array",
                                         "items": {
-                                            "$ref": "#/definitions/informatieobject"
+                                            "type": "string",
+                                            "format": "uri"
                                         },
                                         "description": "Geüploade documenten"
                                     }
