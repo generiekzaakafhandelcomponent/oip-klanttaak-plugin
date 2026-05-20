@@ -117,6 +117,7 @@ Properties:
 - **Ontvangen data mapping** (Optional): Mapping of received keys to process variables.
 - **Koppel documenten**: Whether to link uploaded documents from OIP to the case.
 - **Pad naar documenten** (Optional): The path/variable where documents are stored.
+  - The data structure of the variable must be a list of strings (each representing an url referring to a enkelvoudig informatieobject in the Documenten API).
 
 ![Process task plugin action configuration](assets/process-task.png "Process task plugin action configuration")
 
