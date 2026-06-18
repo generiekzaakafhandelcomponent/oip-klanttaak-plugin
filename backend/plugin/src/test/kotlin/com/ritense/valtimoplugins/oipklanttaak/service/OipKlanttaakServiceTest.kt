@@ -77,36 +77,41 @@ class OipKlanttaakServiceTest {
         valueResolverServiceMock = mock()
         zaakUrlProviderMock = mock()
 
-        oipKlanttaakService = OipKlanttaakService(
-            pluginService = pluginServiceMock,
-            objectManagementService = objectManagementServiceMock,
-            objectMapper = objectMapper,
-            taskService = taskServiceMock,
-            valueResolverService = valueResolverServiceMock,
-            zaakUrlProvider = zaakUrlProviderMock,
-        )
+        oipKlanttaakService =
+            OipKlanttaakService(
+                pluginService = pluginServiceMock,
+                objectManagementService = objectManagementServiceMock,
+                objectMapper = objectMapper,
+                taskService = taskServiceMock,
+                valueResolverService = valueResolverServiceMock,
+                zaakUrlProvider = zaakUrlProviderMock,
+            )
     }
 
     @Test
     fun `delegateTask should create a new object via objecten api and not throw exceptions`() {
         // given
-        val delegateTask = mock<DelegateTask> {
-            on { id } doReturn taskId().toString()
-            on { processInstanceId } doReturn processInstanceId().toString()
-            on { taskDefinitionKey } doReturn "oip-klanttaak"
-            on { name } doReturn "OIP Klanttaak"
-        }
+        val delegateTask =
+            mock<DelegateTask> {
+                on { id } doReturn taskId().toString()
+                on { processInstanceId } doReturn processInstanceId().toString()
+                on { taskDefinitionKey } doReturn "oip-klanttaak"
+                on { name } doReturn "OIP Klanttaak"
+            }
 
         val objectenApiPlugin = objectenApiPlugin()
 
         doReturn(objectManagementConfiguration())
-            .whenever(objectManagementServiceMock).getById(eq(objectManagementConfigurationId()))
+            .whenever(objectManagementServiceMock)
+            .getById(eq(objectManagementConfigurationId()))
 
         doReturn(objecttypenApiPlugin())
-            .whenever(pluginServiceMock).createInstance<ObjecttypenApiPlugin>(eq(objecttypenApiPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<ObjecttypenApiPlugin>(eq(objecttypenApiPluginConfigurationId()))
 
         doReturn(objectenApiPlugin)
-            .whenever(pluginServiceMock).createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
 
         doReturn(
             mapOf(
@@ -127,11 +132,12 @@ class OipKlanttaakServiceTest {
                 authorizeeIdentifier = "TestAuthorizee",
                 levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
                 formUri = URI.create("https://example.com/form/123"),
-                formDataMapping = listOf(
-                    DataBinding("/firstname", "doc:/firstname"),
-                    DataBinding("/lastname", "doc:/lastname"),
-                    DataBinding("/email", "doc:/email"),
-                ),
+                formDataMapping =
+                    listOf(
+                        DataBinding("/firstname", "doc:/firstname"),
+                        DataBinding("/lastname", "doc:/lastname"),
+                        DataBinding("/email", "doc:/email"),
+                    ),
                 expirationDate = OffsetDateTime.now().plusWeeks(2),
             )
         }
@@ -140,40 +146,62 @@ class OipKlanttaakServiceTest {
             verify(objectenApiPlugin).createObject(captor.capture())
 
             assertThat(captor.firstValue.record.data).isNotNull
-            assertThat(captor.firstValue.record.data!!.at("/status").asText())
-                .isEqualTo(Status.OPEN.value)
-            assertThat(captor.firstValue.record.data!!.at("/titel").asText())
-                .isEqualTo("OIP Klanttaak")
-            assertThat(captor.firstValue.record.data!!.at("/verwerker_taak_id").asText())
-                .isEqualTo(taskId().toString())
-            assertThat(captor.firstValue.record.data!!.at("/portaalformulier/data/firstname").asText())
-                .isEqualTo("John")
-            assertThat(captor.firstValue.record.data!!.at("/portaalformulier/data/lastname").asText())
-                .isEqualTo("Doe")
-            assertThat(captor.firstValue.record.data!!.at("/portaalformulier/data/email").asText())
-                .isEqualTo("john.doe@test.com")
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/status")
+                    .asText(),
+            ).isEqualTo(Status.OPEN.value)
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/titel")
+                    .asText(),
+            ).isEqualTo("OIP Klanttaak")
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/verwerker_taak_id")
+                    .asText(),
+            ).isEqualTo(taskId().toString())
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/portaalformulier/data/firstname")
+                    .asText(),
+            ).isEqualTo("John")
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/portaalformulier/data/lastname")
+                    .asText(),
+            ).isEqualTo("Doe")
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/portaalformulier/data/email")
+                    .asText(),
+            ).isEqualTo("john.doe@test.com")
         }
     }
 
     @Test
     fun `completeDelegatedTask should complete the task and not throw exceptions`() {
-        val execution = mock<DelegateExecution> {
-            on { processInstanceId } doReturn processInstanceId().toString()
-            on { businessKey } doReturn businessKey().toString()
-            on { getVariable(ProcessVariables.VERWERKER_TAAK_ID) } doReturn taskId().toString()
-            on { getVariable(ProcessVariables.KLANTTAAK_OBJECT_URL) } doReturn objectUrl().toString()
-        }
+        val execution =
+            mock<DelegateExecution> {
+                on { processInstanceId } doReturn processInstanceId().toString()
+                on { businessKey } doReturn businessKey().toString()
+                on { getVariable(ProcessVariables.VERWERKER_TAAK_ID) } doReturn taskId().toString()
+                on { getVariable(ProcessVariables.KLANTTAAK_OBJECT_URL) } doReturn objectUrl().toString()
+            }
 
-        val objectenApiPlugin = objectenApiPlugin(
-            klanttaak = klanttaak(
-                status = Status.UITGEVOERD,
-                verzondenData =  mapOf(
-                    "firstname" to "John Patrick",
-                    "lastname" to "Smith",
-                    "email" to "john.p.smith@test.com"
-                )
+        val objectenApiPlugin =
+            objectenApiPlugin(
+                klanttaak =
+                    klanttaak(
+                        status = Status.UITGEVOERD,
+                        verzondenData =
+                            mapOf(
+                                "firstname" to "John Patrick",
+                                "lastname" to "Smith",
+                                "email" to "john.p.smith@test.com",
+                            ),
+                    ),
             )
-        )
 
         doReturn(objectenApiPlugin)
             .whenever(pluginServiceMock)
@@ -188,13 +216,14 @@ class OipKlanttaakServiceTest {
                 execution = execution,
                 objectManagementId = objectManagementConfigurationId(),
                 saveReceivedData = true,
-                receivedDataMapping = listOf(
-                    DataBinding("/firstname", "doc:/firstname"),
-                    DataBinding("/lastname", "doc:/lastname"),
-                    DataBinding("/email", "doc:/email")
-                ),
+                receivedDataMapping =
+                    listOf(
+                        DataBinding("/firstname", "doc:/firstname"),
+                        DataBinding("/lastname", "doc:/lastname"),
+                        DataBinding("/email", "doc:/email"),
+                    ),
                 linkDocuments = false,
-                pathToDocuments = null
+                pathToDocuments = null,
             )
         }
 
@@ -204,7 +233,7 @@ class OipKlanttaakServiceTest {
             verify(valueResolverServiceMock).handleValues(
                 processInstanceId = any(),
                 variableScope = any(),
-                values = captor.capture()
+                values = captor.capture(),
             )
 
             assertThat(captor.firstValue.size).isEqualTo(3)
@@ -217,7 +246,11 @@ class OipKlanttaakServiceTest {
             verify(objectenApiPlugin).objectPatch(eq(objectUrl()), captor.capture())
 
             assertThat(captor.firstValue.record.data).isNotNull
-            assertThat(captor.firstValue.record.data!!.at("/status").asText()).isEqualTo(Status.VERWERKT.value)
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/status")
+                    .asText(),
+            ).isEqualTo(Status.VERWERKT.value)
         }
     }
 
@@ -228,22 +261,26 @@ class OipKlanttaakServiceTest {
         titel = "OIP Klanttaak",
         status = status,
         eigenaar = "GZAC",
-        betrokkene = Betrokkene(
-            levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
-            authorizee = Authorizee(LegalSubject(identifier = "Authorizee"))
-        ),
-        portaalformulier = Portaalformulier(
-            formulier = Formulier(
-                value = URI.create("https://example.com/form/123")
+        betrokkene =
+            Betrokkene(
+                levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
+                authorizee = Authorizee(LegalSubject(identifier = "Authorizee")),
             ),
-            data = mapOf(
-                "firstname" to "John",
-                "lastname" to "Doe",
-                "email" to "john.doe@test.com"
+        portaalformulier =
+            Portaalformulier(
+                formulier =
+                    Formulier(
+                        value = URI.create("https://example.com/form/123"),
+                    ),
+                data =
+                    mapOf(
+                        "firstname" to "John",
+                        "lastname" to "Doe",
+                        "email" to "john.doe@test.com",
+                    ),
+                verzondenData = verzondenData,
             ),
-            verzondenData = verzondenData
-        ),
-        verwerkerTaakId = taskId()
+        verwerkerTaakId = taskId(),
     )
 
     private fun processInstanceId() = UUID.fromString("eae3a5bd-1f0e-48f0-8d51-a4ee6231d36c")
@@ -272,7 +309,7 @@ class OipKlanttaakServiceTest {
             title = "OIP Klanttaak",
             objecttypenApiPluginConfigurationId = objecttypenApiPluginConfigurationId(),
             objecttypeId = objectTypeId(),
-            objectenApiPluginConfigurationId = objectenApiPluginConfigurationId()
+            objectenApiPluginConfigurationId = objectenApiPluginConfigurationId(),
         )
 
     private fun objecttypenApiPlugin() =
@@ -286,11 +323,12 @@ class OipKlanttaakServiceTest {
                 url = objectUrl(),
                 uuid = objectId(),
                 type = objectTypeUrl(),
-                record = ObjectRecord(
-                    typeVersion = 1,
-                    startAt = LocalDate.parse("2026-01-01"),
-                    data = objectMapper.valueToTree(klanttaak)
-                ),
+                record =
+                    ObjectRecord(
+                        typeVersion = 1,
+                        startAt = LocalDate.parse("2026-01-01"),
+                        data = objectMapper.valueToTree(klanttaak),
+                    ),
             )
         return mock<ObjectenApiPlugin> {
             on { createObject(any()) } doReturn objectWrapper

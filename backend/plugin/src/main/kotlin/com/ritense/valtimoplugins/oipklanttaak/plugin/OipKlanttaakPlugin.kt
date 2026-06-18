@@ -182,25 +182,25 @@ class OipKlanttaakPlugin(
             kanaal(
                 objecttypenApiPluginUrl = objecttypenApiPlugin.url,
                 objecttypeId = objectManagement.objecttypeId,
-                actie = UPDATE
+                actie = UPDATE,
             ),
             kanaal(
                 objecttypenApiPluginUrl = objecttypenApiPlugin.url,
                 objecttypeId = objectManagement.objecttypeId,
-                actie = PARTIAL_UPDATE
-            )
+                actie = PARTIAL_UPDATE,
+            ),
         )
     }
 
     private fun kanaal(
         objecttypenApiPluginUrl: URI,
         objecttypeId: String,
-        actie: String
+        actie: String,
     ) = Abonnement.Kanaal(
         naam = KANAAL_OBJECTEN,
         filters =
             mapOf(
-                OBJECT_TYPE to "${objecttypenApiPluginUrl}objecttypes/${objecttypeId}",
+                OBJECT_TYPE to "${objecttypenApiPluginUrl}objecttypes/$objecttypeId",
                 ACTIE to actie,
             ),
     )
