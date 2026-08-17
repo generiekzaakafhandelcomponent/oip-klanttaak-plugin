@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de OIP Klanttaak-plugin.
 
+## 1.0.4
+
+Valtimo bijgewerkt naar versie 13.41.0.
+
 ## 1.0.2
 Ondersteuning toegevoegd voor het bijwerken van bestaande klanttaken.
 
