@@ -1,0 +1,28 @@
+{
+  "display" : "form",
+  "components" : [
+    {
+      "key" : "html",
+      "type" : "htmlelement",
+      "attrs" : [
+        {
+          "attr" : "",
+          "value" : ""
+        }
+      ],
+      "input" : false,
+      "label" : "HTML",
+      "content" : "Je staat op het punt de OIP taak in te trekken. Klik op 'Versturen' om door te gaan.",
+      "tableView" : false,
+      "refreshOnChange" : false
+    },
+    {
+      "key" : "submit",
+      "type" : "button",
+      "input" : true,
+      "label" : "Submit",
+      "tableView" : false,
+      "disableOnInvalid" : true
+    }
+  ]
+}

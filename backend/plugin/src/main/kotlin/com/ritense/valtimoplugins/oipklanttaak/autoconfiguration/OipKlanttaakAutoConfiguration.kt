@@ -20,9 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ritense.objectmanagement.service.ObjectManagementService
 import com.ritense.plugin.service.PluginService
 import com.ritense.processdocument.service.ProcessDocumentService
+import com.ritense.processlink.service.ProcessLinkService
 import com.ritense.valtimo.service.OperatonProcessService
 import com.ritense.valtimo.service.OperatonTaskService
 import com.ritense.valtimoplugins.oipklanttaak.listener.OipKlanttaakEventListener
+import com.ritense.valtimoplugins.oipklanttaak.listener.OipKlanttaakTaskDeletedEventListener
 import com.ritense.valtimoplugins.oipklanttaak.plugin.OipKlanttaakPluginFactory
 import com.ritense.valtimoplugins.oipklanttaak.service.OipKlanttaakService
 import com.ritense.valueresolver.ValueResolverService
@@ -79,5 +81,17 @@ class OipKlanttaakAutoConfiguration {
         processDocumentService = processDocumentService,
         processService = processService,
         taskService = taskService,
+    )
+
+    @Bean
+    @ConditionalOnMissingBean(OipKlanttaakTaskDeletedEventListener::class)
+    fun oipKlanttaakTaskDeletedEventListener(
+        processLinkService: ProcessLinkService,
+        pluginService: PluginService,
+        oipKlanttaakService: OipKlanttaakService,
+    ) = OipKlanttaakTaskDeletedEventListener(
+        processLinkService = processLinkService,
+        pluginService = pluginService,
+        oipKlanttaakService = oipKlanttaakService,
     )
 }

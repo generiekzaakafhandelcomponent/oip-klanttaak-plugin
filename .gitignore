@@ -1,23 +1,9 @@
 ######################
-# Project Specific
-######################
-/src/main/webapp/content/css/**
-/build/www/**
-bower_components
-/src/main/webapp/i18n/*.js
-
-######################
 # Node
 ######################
 frontend/node/**
 frontend/node_tmp/**
 frontend/node_modules/**
-frontend/node_modules/bl/node_modules/readable-stream
-
-######################
-# SASS
-######################
-.sass-cache/**
 
 ######################
 # Eclipse
@@ -36,7 +22,6 @@ local.properties
 .classpath
 .settings/**
 .loadpath
-/src/main/resources/rebel.xml
 
 # External tool builders
 .externalToolBuilders/**
@@ -145,7 +130,6 @@ Desktop.ini
 # ESLint
 ######################
 .eslintcache
-/src/main/resources/.h2.server.properties
 
 ######################
 # Deployment directory
@@ -169,3 +153,6 @@ frontend/package-lock.json
 .kotlin
 .idea
 migration
+
+# Riptide artifacts (cloud-synced)
+.humanlayer/tasks/

@@ -12,6 +12,8 @@ The plugin provides two main actions:
 1. **Delegate task**: Creates an object in the Objects API representing the task, making it available in the OIP.
 2. **Complete delegated task**: Finalizes the task in Valtimo and updates the status of the related object in the Objects API.
 
+In addition, the plugin automatically **withdraws** a delegated task that ends before the citizen submits it — for example when an interrupting boundary event cancels the task or the process instance is deleted/terminated. The related object is moved to status `ingetrokken` so it disappears from the OIP portal. This requires no extra configuration; see [Technical Details](#technical-details) for the behaviour and its limitations.
+
 # Dependencies
 
 - **[Valtimo GZAC](https://docs.valtimo.nl/)**: The core platform where the plugin is integrated.
@@ -123,5 +125,13 @@ Properties:
 
 # Technical Details
 
-- Process Variables: The plugin uses verwerkerTaakId to track the link between the Valtimo task and the OIP object, and klanttaakObjectUrl for the URL of the created object.
+- Process Variables: The plugin uses verwerkerTaakId to track the link between the Valtimo task and the OIP object, and klanttaakObjectUrl for the URL of the created object. When a task is delegated, its object URL is also stamped on the process instance under `klanttaakObjectUrl_{taskId}` so it survives task cancellation.
 - Event Listener: The OipKlanttaakEventListener monitors notifications from Open Notificaties. When an object update is received with status uitgevoerd, it automatically completes the corresponding task in Valtimo.
+- Withdrawal on task deletion: The OipKlanttaakTaskDeletedEventListener reacts to the Operaton task `delete` event. When a delegated task ends before the citizen submits it — because an interrupting boundary event cancels the task, or the process instance is deleted/terminated — the related object is moved to status `ingetrokken` so it disappears from the OIP portal. The transition is idempotent and race-safe: an object already at `uitgevoerd` lets normal completion win, and terminal statuses are left untouched.
+
+> **Limitation — skipping custom listeners:** The withdrawal relies on the Operaton eventing bridge (`operaton.bpm.eventing.skippable`). When this property is set to `true`, deleting a process instance while skipping custom listeners bypasses the task `delete` event, so the object is **not** withdrawn and remains visible in the OIP portal. This happens when:
+> - a process instance is deleted via Operaton Cockpit with "skip custom listeners" selected;
+> - the equivalent `skipCustomListeners=true` option is used on the process-instance delete REST API;
+> - a case is deleted (which deletes the underlying process instance while skipping custom listeners).
+>
+> Delete process instances without skipping custom listeners when the object should be withdrawn.
