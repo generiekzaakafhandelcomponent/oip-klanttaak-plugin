@@ -9,8 +9,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:54320/plugin
-    username: plugin
+    url: jdbc:postgresql://localhost:54320/gzac
+    username: gzac
     password: password
     hikari:
       auto-commit: false
@@ -133,6 +133,8 @@ operaton:
       id: Admin
       password: admin
       first-name: Admin account
+#    eventing:
+#      skippable: false
     generic-properties:
       properties:
         deploy-changed-only: true
