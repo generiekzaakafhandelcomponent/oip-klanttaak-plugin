@@ -48,6 +48,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.operaton.bpm.engine.delegate.DelegateExecution
@@ -94,6 +95,7 @@ class OipKlanttaakServiceTest {
         val delegateTask =
             mock<DelegateTask> {
                 on { id } doReturn taskId().toString()
+                on { execution } doReturn mock()
                 on { processInstanceId } doReturn processInstanceId().toString()
                 on { taskDefinitionKey } doReturn "oip-klanttaak"
                 on { name } doReturn "OIP Klanttaak"
@@ -252,6 +254,108 @@ class OipKlanttaakServiceTest {
                     .asText(),
             ).isEqualTo(Status.VERWERKT.value)
         }
+    }
+
+    @Test
+    fun `delegateTask should stamp the created object url on the execution`() {
+        val executionMock = mock<DelegateExecution>()
+        val delegateTask =
+            mock<DelegateTask> {
+                on { id } doReturn taskId().toString()
+                on { execution } doReturn executionMock
+                on { processInstanceId } doReturn processInstanceId().toString()
+                on { taskDefinitionKey } doReturn "oip-klanttaak"
+                on { name } doReturn "OIP Klanttaak"
+            }
+
+        doReturn(objectManagementConfiguration())
+            .whenever(objectManagementServiceMock)
+            .getById(eq(objectManagementConfigurationId()))
+
+        doReturn(objecttypenApiPlugin())
+            .whenever(pluginServiceMock)
+            .createInstance<ObjecttypenApiPlugin>(eq(objecttypenApiPluginConfigurationId()))
+
+        doReturn(objectenApiPlugin())
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+
+        oipKlanttaakService.delegateTask(
+            delegateTask = delegateTask,
+            objectManagementId = objectManagementConfigurationId(),
+            authorizeeIdentifier = "TestAuthorizee",
+            levelOfAssurance = LevelOfAssurance.MOBILE_TWO_FACTOR_CONTRACT,
+            formUri = URI.create("https://example.com/form/123"),
+            expirationDate = OffsetDateTime.now().plusWeeks(2),
+        )
+
+        verify(executionMock).setVariable(
+            eq(ProcessVariables.oipTaskObjectUrlKey(taskId().toString())),
+            eq(objectUrl().toString()),
+        )
+    }
+
+    @Test
+    fun `withdrawDelegatedTask from OPEN should patch the object to ingetrokken`() {
+        val objectenApiPlugin = objectenApiPlugin(klanttaak = klanttaak(status = Status.OPEN))
+
+        doReturn(objectenApiPlugin)
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+
+        doReturn(objectManagementConfiguration())
+            .whenever(objectManagementServiceMock)
+            .getById(eq(objectManagementConfigurationId()))
+
+        oipKlanttaakService.withdrawDelegatedTask(
+            objectManagementId = objectManagementConfigurationId(),
+            klanttaakObjectUrl = objectUrl(),
+        )
+
+        argumentCaptor<ObjectRequest>().let { captor ->
+            verify(objectenApiPlugin).objectPatch(eq(objectUrl()), captor.capture())
+
+            assertThat(captor.firstValue.record.data).isNotNull
+            assertThat(
+                captor.firstValue.record.data!!
+                    .at("/status")
+                    .asText(),
+            ).isEqualTo(Status.INGETROKKEN.value)
+        }
+    }
+
+    @Test
+    fun `withdrawDelegatedTask from UITGEVOERD should not patch the object`() {
+        assertWithdrawIsNoOp(Status.UITGEVOERD)
+    }
+
+    @Test
+    fun `withdrawDelegatedTask from VERWERKT should not patch the object`() {
+        assertWithdrawIsNoOp(Status.VERWERKT)
+    }
+
+    @Test
+    fun `withdrawDelegatedTask from INGETROKKEN should not patch the object`() {
+        assertWithdrawIsNoOp(Status.INGETROKKEN)
+    }
+
+    private fun assertWithdrawIsNoOp(status: Status) {
+        val objectenApiPlugin = objectenApiPlugin(klanttaak = klanttaak(status = status))
+
+        doReturn(objectenApiPlugin)
+            .whenever(pluginServiceMock)
+            .createInstance<ObjectenApiPlugin>(eq(objectenApiPluginConfigurationId()))
+
+        doReturn(objectManagementConfiguration())
+            .whenever(objectManagementServiceMock)
+            .getById(eq(objectManagementConfigurationId()))
+
+        oipKlanttaakService.withdrawDelegatedTask(
+            objectManagementId = objectManagementConfigurationId(),
+            klanttaakObjectUrl = objectUrl(),
+        )
+
+        verify(objectenApiPlugin, never()).objectPatch(any(), any())
     }
 
     private fun klanttaak(

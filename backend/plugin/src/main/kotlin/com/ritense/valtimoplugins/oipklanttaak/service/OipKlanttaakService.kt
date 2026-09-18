@@ -132,11 +132,15 @@ class OipKlanttaakService(
                                         startAt = LocalDate.now(),
                                     ),
                             ),
-                        ).also {
+                        ).also { created ->
                             logger.info {
-                                "Klanttaak object with UUID '${it.uuid}' and URL '${it.url}' created for " +
+                                "Klanttaak object with UUID '${created.uuid}' and URL '${created.url}' created for " +
                                     "task with id '${delegateTask.id}'"
                             }
+                            delegateTask.execution.setVariable(
+                                ProcessVariables.oipTaskObjectUrlKey(delegateTask.id),
+                                created.url.toString(),
+                            )
                         }
                 }
         }
@@ -283,6 +287,59 @@ class OipKlanttaakService(
                                     logger.info {
                                         "Klanttaak object with URL '$klanttaakObjectUrl' completed by changing status to '${Status.VERWERKT.name}'"
                                     }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun withdrawDelegatedTask(
+        objectManagementId: UUID,
+        klanttaakObjectUrl: URI,
+    ) {
+        objectManagementById(objectManagementId).let { objectManagement ->
+            objectenApiPluginByPluginConfigurationId(
+                objectManagement.objectenApiPluginConfigurationId,
+            ).let { objectenApiPlugin ->
+                objectenApiPlugin.getObject(klanttaakObjectUrl).let { objectWrapper ->
+                    requireNotNull(objectWrapper.record.data) {
+                        "No data found for object with URL '$klanttaakObjectUrl'"
+                    }
+                    objectMapper.convertValue<Klanttaak>(objectWrapper.record.data).let { klanttaak ->
+                        when (klanttaak.status) {
+                            Status.OPEN ->
+                                klanttaak.copy(status = Status.INGETROKKEN).let { withdrawnOipTask ->
+                                    objectenApiPlugin
+                                        .objectPatch(
+                                            objectUrl = klanttaakObjectUrl,
+                                            objectRequest =
+                                                ObjectRequest(
+                                                    type = objectWrapper.type,
+                                                    record =
+                                                        objectWrapper.record.copy(
+                                                            data = objectMapper.convertValue(withdrawnOipTask),
+                                                        ),
+                                                ),
+                                        ).also {
+                                            logger.info {
+                                                "Klanttaak object with URL '$klanttaakObjectUrl' withdrawn by " +
+                                                    "changing status to '${Status.INGETROKKEN.name}'"
+                                            }
+                                        }
+                                }
+
+                            Status.UITGEVOERD ->
+                                logger.info {
+                                    "Skipping withdraw for object with URL '$klanttaakObjectUrl': " +
+                                        "already submitted; completion wins."
+                                }
+
+                            Status.AFGEBROKEN, Status.VERWERKT, Status.INGETROKKEN ->
+                                logger.info {
+                                    "Skipping withdraw for object with URL '$klanttaakObjectUrl': " +
+                                        "already terminal (${klanttaak.status})."
                                 }
                         }
                     }

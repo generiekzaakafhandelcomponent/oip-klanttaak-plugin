@@ -19,4 +19,6 @@ package com.ritense.valtimoplugins.oipklanttaak
 object ProcessVariables {
     const val VERWERKER_TAAK_ID = "verwerkerTaakId"
     const val KLANTTAAK_OBJECT_URL = "klanttaakObjectUrl"
+
+    fun oipTaskObjectUrlKey(taskId: String) = "${KLANTTAAK_OBJECT_URL}_$taskId"
 }
