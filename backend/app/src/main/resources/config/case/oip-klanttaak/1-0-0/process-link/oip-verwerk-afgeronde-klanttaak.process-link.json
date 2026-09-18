@@ -1,54 +1,56 @@
 [
   {
-    "activityId": "st-verwerk-afgeronde-klanttaak",
-    "activityType": "bpmn:ServiceTask:start",
-    "pluginConfigurationId": "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
-    "pluginActionDefinitionKey": "complete-delegated-task",
-    "actionProperties": {
-      "padNaarDocumenten": "/upload_documenten",
-      "ontvangenDataMapping": [
+    "activityId" : "st-verwerk-afgeronde-klanttaak",
+    "activityType" : "bpmn:ServiceTask:start",
+    "pluginConfigurationId" : "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
+    "pluginActionDefinitionKey" : "complete-delegated-task",
+    "actionProperties" : {
+      "koppelDocumenten" : true,
+      "padNaarDocumenten" : "/upload_documenten",
+      "ontvangenDataMapping" : [
         {
-          "key": "/volledige_naam",
-          "value": "doc:/volledigeNaam"
+          "key" : "/volledige_naam",
+          "value" : "doc:/volledigeNaam"
         },
         {
-          "key": "/voornaam",
-          "value": "doc:/voornaam"
+          "key" : "/voornaam",
+          "value" : "doc:/voornaam"
         },
         {
-          "key": "/tussenvoegsel",
-          "value": "doc:/tussenvoegsel"
+          "key" : "/tussenvoegsel",
+          "value" : "doc:/tussenvoegsel"
         },
         {
-          "key": "/achternaam",
-          "value": "doc:/achternaam"
+          "key" : "/achternaam",
+          "value" : "doc:/achternaam"
         },
         {
-          "key": "/emailadres",
-          "value": "doc:/emailadres"
+          "key" : "/emailadres",
+          "value" : "doc:/emailadres"
         },
         {
-          "key": "/emailadres",
-          "value": "pv:emailAdres"
+          "key" : "/emailadres",
+          "value" : "pv:emailAdres"
         },
         {
-          "key": "/upload_documenten",
-          "value": "pv:uploadDocumenten"
+          "key" : "/upload_documenten",
+          "value" : "pv:uploadDocumenten"
         }
       ],
-      "bewaarIngediendeGegevens": true,
-      "koppelDocumenten": true
+      "bewaarIngediendeGegevens" : true
     },
-    "processLinkType": "plugin"
+    "referenceType" : "FIXED",
+    "pluginDefinitionKey" : "oip-klanttaak",
+    "processLinkType" : "plugin"
   },
   {
-    "activityId": "ut-valideer-klanttaak-input",
-    "activityType": "bpmn:UserTask:create",
-    "formDefinitionName": "validate-oip-task-response",
-    "viewModelEnabled": false,
-    "formDisplayType": "modal",
-    "formSize": "medium",
-    "subtitles": null,
-    "processLinkType": "form"
+    "activityId" : "ut-valideer-klanttaak-input",
+    "activityType" : "bpmn:UserTask:create",
+    "formDefinitionName" : "validate-oip-task-response",
+    "viewModelEnabled" : false,
+    "formDisplayType" : "modal",
+    "formSize" : "medium",
+    "subtitles" : [],
+    "processLinkType" : "form"
   }
 ]

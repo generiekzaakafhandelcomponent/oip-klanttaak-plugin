@@ -1,39 +1,39 @@
 {
-  "$id": "oip-klanttaak.schema",
-  "type": "object",
-  "title": "OIP Klanttaak",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "properties": {
-    "voornaam": {
-      "type": [
+  "$id" : "oip-klanttaak.schema",
+  "type" : "object",
+  "title" : "OIP Klanttaak",
+  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "properties" : {
+    "voornaam" : {
+      "type" : [
         "string",
         "null"
       ]
     },
-    "achternaam": {
-      "type": [
+    "achternaam" : {
+      "type" : [
         "string",
         "null"
       ]
     },
-    "emailadres": {
-      "type": [
+    "emailadres" : {
+      "type" : [
         "string",
         "null"
       ]
     },
-    "tussenvoegsel": {
-      "type": [
+    "tussenvoegsel" : {
+      "type" : [
         "string",
         "null"
       ]
     },
-    "volledigeNaam": {
-      "type": [
+    "volledigeNaam" : {
+      "type" : [
         "string",
         "null"
       ]
     }
   },
-  "additionalProperties": false
+  "additionalProperties" : false
 }

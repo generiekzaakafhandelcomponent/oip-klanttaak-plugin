@@ -1,12 +1,17 @@
 [
   {
-    "processDefinitionKey": "oip-procesflow",
-    "canInitializeDocument": true,
-    "startableByUser": true
+    "processDefinitionKey" : "oip-verwerk-afgeronde-klanttaak",
+    "canInitializeDocument" : false,
+    "startableByUser" : false
   },
   {
-    "processDefinitionKey": "oip-verwerk-afgeronde-klanttaak",
-    "canInitializeDocument": false,
-    "startableByUser": false
+    "processDefinitionKey" : "oip-revoke-delegated-task",
+    "canInitializeDocument" : false,
+    "startableByUser" : true
+  },
+  {
+    "processDefinitionKey" : "oip-procesflow",
+    "canInitializeDocument" : true,
+    "startableByUser" : true
   }
 ]

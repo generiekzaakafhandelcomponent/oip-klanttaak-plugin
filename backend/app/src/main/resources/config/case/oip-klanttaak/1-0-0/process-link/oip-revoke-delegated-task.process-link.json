@@ -1,0 +1,12 @@
+[
+  {
+    "activityId" : "StartEvent_1",
+    "activityType" : "bpmn:StartEvent:start",
+    "formDefinitionName" : "start-form-revoke-oip-task",
+    "viewModelEnabled" : false,
+    "formDisplayType" : "modal",
+    "formSize" : "small",
+    "subtitles" : null,
+    "processLinkType" : "form"
+  }
+]

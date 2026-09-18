@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" typeLanguage="http://www.w3.org/2001/XMLSchema">
+      
+  
+  <bpmn:process camunda:versionTag="CD:oip-klanttaak:1.0.0" id="oip-revoke-delegated-task" isClosed="false" isExecutable="true" name="OIP: Taak intrekken" processType="None">
+            
+    
+    <bpmn:startEvent id="StartEvent_1" isInterrupting="true" parallelMultiple="false">
+                  
+      
+      <bpmn:outgoing>Flow_1ai1c1q</bpmn:outgoing>
+                
+    
+    </bpmn:startEvent>
+            
+    
+    <bpmn:sequenceFlow id="Flow_1ai1c1q" sourceRef="StartEvent_1" targetRef="oip-taak-ingetrokken"/>
+            
+    
+    <bpmn:endEvent id="Event_1eir6ge">
+                  
+      
+      <bpmn:incoming>Flow_0kveu99</bpmn:incoming>
+                
+    
+    </bpmn:endEvent>
+            
+    
+    <bpmn:sequenceFlow id="Flow_0kveu99" sourceRef="oip-taak-ingetrokken" targetRef="Event_1eir6ge"/>
+            
+    
+    <bpmn:sendTask camunda:expression="${correlationService.sendCatchEventMessageToCase('OIP_TAAK_INGETROKKEN', execution)}" completionQuantity="1" id="oip-taak-ingetrokken" implementation="##WebService" isForCompensation="false" name="OIP Taak ingetrokken" startQuantity="1">
+                  
+      
+      <bpmn:incoming>Flow_1ai1c1q</bpmn:incoming>
+                  
+      
+      <bpmn:outgoing>Flow_0kveu99</bpmn:outgoing>
+                
+    
+    </bpmn:sendTask>
+          
+  
+  </bpmn:process>
+      
+  
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+            
+    
+    <bpmndi:BPMNPlane bpmnElement="oip-revoke-delegated-task" id="BPMNPlane_1">
+                  
+      
+      <bpmndi:BPMNShape bpmnElement="StartEvent_1" id="_BPMNShape_StartEvent_2">
+                        
+        
+        <dc:Bounds height="36" width="36" x="173" y="102"/>
+                      
+      
+      </bpmndi:BPMNShape>
+                  
+      
+      <bpmndi:BPMNShape bpmnElement="Event_1eir6ge" id="Event_1eir6ge_di">
+                        
+        
+        <dc:Bounds height="36" width="36" x="412" y="102"/>
+                      
+      
+      </bpmndi:BPMNShape>
+                  
+      
+      <bpmndi:BPMNShape bpmnElement="oip-taak-ingetrokken" id="Activity_0799pbj_di">
+                        
+        
+        <dc:Bounds height="80" width="100" x="260" y="80"/>
+                        
+        
+        <bpmndi:BPMNLabel/>
+                      
+      
+      </bpmndi:BPMNShape>
+                  
+      
+      <bpmndi:BPMNEdge bpmnElement="Flow_1ai1c1q" id="Flow_1ai1c1q_di">
+                        
+        
+        <di:waypoint x="209" y="120"/>
+                        
+        
+        <di:waypoint x="260" y="120"/>
+                      
+      
+      </bpmndi:BPMNEdge>
+                  
+      
+      <bpmndi:BPMNEdge bpmnElement="Flow_0kveu99" id="Flow_0kveu99_di">
+                        
+        
+        <di:waypoint x="360" y="120"/>
+                        
+        
+        <di:waypoint x="412" y="120"/>
+                      
+      
+      </bpmndi:BPMNEdge>
+                
+    
+    </bpmndi:BPMNPlane>
+          
+  
+  </bpmndi:BPMNDiagram>
+    
+
+</bpmn:definitions>

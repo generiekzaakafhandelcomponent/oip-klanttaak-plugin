@@ -1,27 +1,27 @@
 {
-  "display": "form",
-  "components": [
+  "display" : "form",
+  "components" : [
     {
-      "key": "pv:volledigeNaam",
-      "type": "textfield",
-      "input": true,
-      "label": "Volledige naam",
-      "validate": {
-        "required": true
+      "key" : "pv:volledigeNaam",
+      "type" : "textfield",
+      "input" : true,
+      "label" : "Volledige naam",
+      "validate" : {
+        "required" : true
       },
-      "tableView": true,
-      "attributes": {
-        "data-testid": "start-form-doc:/volledigeNaam"
+      "tableView" : true,
+      "attributes" : {
+        "data-testid" : "start-form-doc:/volledigeNaam"
       },
-      "applyMaskOn": "change"
+      "applyMaskOn" : "change"
     },
     {
-      "key": "submit",
-      "type": "button",
-      "input": true,
-      "label": "Submit",
-      "tableView": false,
-      "disableOnInvalid": true
+      "key" : "submit",
+      "type" : "button",
+      "input" : true,
+      "label" : "Submit",
+      "tableView" : false,
+      "disableOnInvalid" : true
     }
   ]
 }

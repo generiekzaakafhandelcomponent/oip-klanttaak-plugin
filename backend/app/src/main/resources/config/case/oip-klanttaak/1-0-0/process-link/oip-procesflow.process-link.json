@@ -1,48 +1,50 @@
 [
   {
-    "activityId": "StartEvent",
-    "activityType": "bpmn:StartEvent:start",
-    "formDefinitionName": "start-form",
-    "viewModelEnabled": false,
-    "formDisplayType": "modal",
-    "formSize": "medium",
-    "subtitles": null,
-    "processLinkType": "form"
-  },
-  {
-    "activityId": "ut-oip-gegevens-aanleveren",
-    "activityType": "bpmn:UserTask:create",
-    "pluginConfigurationId": "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
-    "pluginActionDefinitionKey": "delegate-task",
-    "actionProperties": {
-      "betrokkeneIdentifier": "000000000",
-      "formulierUri": "http://host.docker.local/formulieren/123456789",
-      "toelichting": "Aanleveren van de gevraagde gegevens om het process van de aanvraag te kunnen vervolgen.",
-      "verloopdatum": "pv:oipTaskExpirationDate",
-      "levelOfAssurance": "MOBILE_TWO_FACTOR_CONTRACT",
-      "formulierDataMapping": [
+    "activityId" : "ut-oip-gegevens-aanleveren",
+    "activityType" : "bpmn:UserTask:create",
+    "pluginConfigurationId" : "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
+    "pluginActionDefinitionKey" : "delegate-task",
+    "actionProperties" : {
+      "toelichting" : "Aanleveren van de gevraagde gegevens om het process van de aanvraag te kunnen vervolgen.",
+      "formulierUri" : "http://host.docker.local/formulieren/123456789",
+      "verloopdatum" : "pv:oipTaskExpirationDate",
+      "levelOfAssurance" : "MOBILE_TWO_FACTOR_CONTRACT",
+      "betrokkeneIdentifier" : "000000000",
+      "formulierDataMapping" : [
         {
-          "key": "/voornaam",
-          "value": "doc:/voornaam"
+          "key" : "/voornaam",
+          "value" : "doc:/voornaam"
         },
         {
-          "key": "/tussenvoegsel",
-          "value": "doc:/tussenvoegsel"
+          "key" : "/tussenvoegsel",
+          "value" : "doc:/tussenvoegsel"
         },
         {
-          "key": "/achternaam",
-          "value": "doc:/achternaam"
+          "key" : "/achternaam",
+          "value" : "doc:/achternaam"
         },
         {
-          "key": "/emailadres",
-          "value": "doc:/emailadres"
+          "key" : "/emailadres",
+          "value" : "doc:/emailadres"
         },
         {
-          "key": "/volledige_naam",
-          "value": "pv:volledigeNaam"
+          "key" : "/volledige_naam",
+          "value" : "pv:volledigeNaam"
         }
       ]
     },
-    "processLinkType": "plugin"
+    "referenceType" : "FIXED",
+    "pluginDefinitionKey" : "oip-klanttaak",
+    "processLinkType" : "plugin"
+  },
+  {
+    "activityId" : "StartEvent",
+    "activityType" : "bpmn:StartEvent:start",
+    "formDefinitionName" : "start-form",
+    "viewModelEnabled" : false,
+    "formDisplayType" : "modal",
+    "formSize" : "medium",
+    "subtitles" : [],
+    "processLinkType" : "form"
   }
 ]
