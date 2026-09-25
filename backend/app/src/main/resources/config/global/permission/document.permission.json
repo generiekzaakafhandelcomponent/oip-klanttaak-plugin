@@ -7,7 +7,9 @@
             "create",
             "modify",
             "delete",
-            "claim",
+          "inspect",
+          "inspect_modify",
+          "claim",
             "assign",
             "assignable",
             "export"

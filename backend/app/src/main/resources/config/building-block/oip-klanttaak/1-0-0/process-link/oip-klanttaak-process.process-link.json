@@ -1,0 +1,40 @@
+[
+  {
+    "activityId" : "bb-oip-gegevens-aanleveren",
+    "activityType" : "bpmn:UserTask:create",
+    "pluginConfigurationId" : "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
+    "pluginActionDefinitionKey" : "delegate-task",
+    "actionProperties" : {
+      "toelichting" : "Aanleveren van de gevraagde gegevens om het process van de aanvraag te kunnen vervolgen vanuit een bouwblok.",
+      "formulierUri" : "http://host.docker.local/formulieren/987654321",
+      "verloopdatum" : "doc:/oipTaskExpirationDate",
+      "levelOfAssurance" : "MOBILE_TWO_FACTOR_CONTRACT",
+      "betrokkeneIdentifier" : "000000000",
+      "formulierDataMapping" : [
+        {
+          "key" : "/voornaam",
+          "value" : "doc:/voornaam"
+        },
+        {
+          "key" : "/tussenvoegsel",
+          "value" : "doc:/tussenvoegsel"
+        },
+        {
+          "key" : "/achternaam",
+          "value" : "doc:/achternaam"
+        },
+        {
+          "key" : "/emailadres",
+          "value" : "doc:/emailadres"
+        },
+        {
+          "key" : "/volledige_naam",
+          "value" : "pv:volledigeNaam"
+        }
+      ]
+    },
+    "referenceType" : "FIXED",
+    "pluginDefinitionKey" : "oip-klanttaak",
+    "processLinkType" : "plugin"
+  }
+]

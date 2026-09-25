@@ -2,6 +2,44 @@
   "display" : "form",
   "components" : [
     {
+      "id": "eke0lxo",
+      "key": "pv:test-flow",
+      "type": "select",
+      "input": true,
+      "label": "",
+      "dataSrc": "values",
+      "data": {
+        "values": [
+          {
+            "label": "met proces",
+            "value": "MET_PROCES"
+          },
+          {
+            "label": "met bouwblok",
+            "value": "MET_BOUWBLOK"
+          }
+        ]
+      },
+      "widget": "choicesjs",
+      "tableView": true,
+      "defaultValue": "MET_BOUWBLOK",
+      "validate": {
+        "required": true
+      },
+      "attributes": {
+        "data-testid": "test-flow-test-id"
+      },
+      "persistent": true,
+      "validateOn": "change",
+      "clearOnHide": true,
+      "conditional": {
+        "show": null,
+        "when": null,
+        "eq": ""
+      },
+      "labelPosition": "top"
+    },
+    {
       "key" : "pv:volledigeNaam",
       "type" : "textfield",
       "input" : true,
