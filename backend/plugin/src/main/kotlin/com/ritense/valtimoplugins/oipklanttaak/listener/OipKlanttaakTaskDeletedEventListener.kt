@@ -17,7 +17,9 @@
 package com.ritense.valtimoplugins.oipklanttaak.listener
 
 import com.ritense.authorization.annotation.RunWithoutAuthorization
+import com.ritense.plugin.domain.PluginConfigurationReferenceType
 import com.ritense.plugin.domain.PluginProcessLink
+import com.ritense.plugin.service.BuildingBlockPluginConfigurationResolver
 import com.ritense.plugin.service.PluginService
 import com.ritense.processlink.service.ProcessLinkService
 import com.ritense.valtimo.event.OperatonTaskEvent
@@ -33,6 +35,7 @@ open class OipKlanttaakTaskDeletedEventListener(
     private val processLinkService: ProcessLinkService,
     private val pluginService: PluginService,
     private val oipKlanttaakService: OipKlanttaakService,
+    private val buildingBlockPluginConfigurationResolver: BuildingBlockPluginConfigurationResolver
 ) {
     @Transactional
     @RunWithoutAuthorization
@@ -58,12 +61,15 @@ open class OipKlanttaakTaskDeletedEventListener(
             return
         }
 
-        val pluginConfigurationId =
+        val pluginConfigurationId = if (oipLink.pluginConfigurationReference.type == PluginConfigurationReferenceType.BUILDING_BLOCK) {
+            buildingBlockPluginConfigurationResolver.resolve(task, oipLink.pluginConfigurationReference.pluginDefinitionKey!!)
+        } else {
             requireNotNull(oipLink.pluginConfigurationId) {
                 "Plugin configuration id is required for the delegate-task process link."
             }.id
+        }
 
-        val oipKlanttaakPlugin = pluginService.createInstance<OipKlanttaakPlugin>(pluginConfigurationId)
+        val oipKlanttaakPlugin = pluginService.createInstance<OipKlanttaakPlugin>(pluginConfigurationId!!)
 
         logger.info {
             "Deleted delegated Task(id=${task.id}) detected, withdrawing Klanttaak object with URL '$objectUrl'"

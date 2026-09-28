@@ -1,4 +1,4 @@
-name: plugin-docker-compose
+name: oip-klanttaak-gzac
 
 services:
   keycloak:
