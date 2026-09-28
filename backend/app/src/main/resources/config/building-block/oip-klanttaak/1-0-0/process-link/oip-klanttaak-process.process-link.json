@@ -29,7 +29,7 @@
         },
         {
           "key" : "/volledige_naam",
-          "value" : "pv:volledigeNaam"
+          "value" : "doc:volledigeNaam"
         }
       ]
     },
