@@ -1,50 +1,82 @@
 [
   {
-    "activityId" : "ut-oip-gegevens-aanleveren",
-    "activityType" : "bpmn:UserTask:create",
-    "pluginConfigurationId" : "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
-    "pluginActionDefinitionKey" : "delegate-task",
-    "actionProperties" : {
-      "toelichting" : "Aanleveren van de gevraagde gegevens om het process van de aanvraag te kunnen vervolgen.",
-      "formulierUri" : "http://host.docker.local/formulieren/123456789",
-      "verloopdatum" : "pv:oipTaskExpirationDate",
-      "levelOfAssurance" : "MOBILE_TWO_FACTOR_CONTRACT",
-      "betrokkeneIdentifier" : "000000000",
-      "formulierDataMapping" : [
+    "activityId": "test-met-bouwblok-task",
+    "activityType": "bpmn:CallActivity:start",
+    "buildingBlockDefinitionKey": "oip-klanttaak",
+    "buildingBlockDefinitionVersionTag": "1.0.0",
+    "pluginConfigurationMappings": {
+      "oip-klanttaak": "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6"
+    },
+    "inputMappings": [
+      {
+        "source": "pv:oipTaskExpirationDate",
+        "target": "oipTaskExpirationDate"
+      },
+      {
+        "source": "pv:volledigeNaam",
+        "target": "volledigeNaam"
+      }
+    ],
+    "outputMappings": [
+    ],
+    "processLinkType": "building-block"
+  },
+  {
+    "activityId": "ut-oip-gegevens-aanleveren",
+    "activityType": "bpmn:UserTask:create",
+    "pluginConfigurationId": "188c8eb4-82a0-4537-b421-7f2a4c0a2ef6",
+    "pluginActionDefinitionKey": "delegate-task",
+    "actionProperties": {
+      "toelichting": "Aanleveren van de gevraagde gegevens om het process van de aanvraag te kunnen vervolgen.",
+      "formulierUri": "http://host.docker.local/formulieren/123456789",
+      "verloopdatum": "pv:oipTaskExpirationDate",
+      "levelOfAssurance": "MOBILE_TWO_FACTOR_CONTRACT",
+      "betrokkeneIdentifier": "000000000",
+      "formulierDataMapping": [
         {
-          "key" : "/voornaam",
-          "value" : "doc:/voornaam"
+          "key": "/voornaam",
+          "value": "doc:/voornaam"
         },
         {
-          "key" : "/tussenvoegsel",
-          "value" : "doc:/tussenvoegsel"
+          "key": "/tussenvoegsel",
+          "value": "doc:/tussenvoegsel"
         },
         {
-          "key" : "/achternaam",
-          "value" : "doc:/achternaam"
+          "key": "/achternaam",
+          "value": "doc:/achternaam"
         },
         {
-          "key" : "/emailadres",
-          "value" : "doc:/emailadres"
+          "key": "/emailadres",
+          "value": "doc:/emailadres"
         },
         {
-          "key" : "/volledige_naam",
-          "value" : "pv:volledigeNaam"
+          "key": "/volledige_naam",
+          "value": "pv:volledigeNaam"
         }
       ]
     },
-    "referenceType" : "FIXED",
-    "pluginDefinitionKey" : "oip-klanttaak",
-    "processLinkType" : "plugin"
+    "referenceType": "FIXED",
+    "pluginDefinitionKey": "oip-klanttaak",
+    "processLinkType": "plugin"
   },
   {
-    "activityId" : "StartEvent",
-    "activityType" : "bpmn:StartEvent:start",
-    "formDefinitionName" : "start-form",
-    "viewModelEnabled" : false,
-    "formDisplayType" : "modal",
-    "formSize" : "medium",
-    "subtitles" : [],
-    "processLinkType" : "form"
+    "activityId": "StartEvent",
+    "activityType": "bpmn:StartEvent:start",
+    "formDefinitionName": "start-form",
+    "viewModelEnabled": false,
+    "formDisplayType": "modal",
+    "formSize": "medium",
+    "subtitles": [],
+    "processLinkType": "form"
+  },
+  {
+    "activityId": "close-task",
+    "activityType": "bpmn:UserTask:create",
+    "formDefinitionName": "empty-form",
+    "viewModelEnabled": false,
+    "formDisplayType": "modal",
+    "formSize": "medium",
+    "subtitles": [],
+    "processLinkType": "form"
   }
 ]

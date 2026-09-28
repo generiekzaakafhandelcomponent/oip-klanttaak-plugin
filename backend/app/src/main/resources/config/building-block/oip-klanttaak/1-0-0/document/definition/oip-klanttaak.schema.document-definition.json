@@ -1,0 +1,21 @@
+{
+  "$id": "oip-klanttaak.schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Upload document naar documenten API en koppelen aan een zaak",
+  "type": "object",
+  "properties": {
+    "volledigeNaam": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "oipTaskExpirationDate": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -18,6 +18,7 @@ package com.ritense.valtimoplugins.oipklanttaak.autoconfiguration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ritense.objectmanagement.service.ObjectManagementService
+import com.ritense.plugin.service.BuildingBlockPluginConfigurationResolver
 import com.ritense.plugin.service.PluginService
 import com.ritense.processdocument.service.ProcessDocumentService
 import com.ritense.processlink.service.ProcessLinkService
@@ -89,9 +90,11 @@ class OipKlanttaakAutoConfiguration {
         processLinkService: ProcessLinkService,
         pluginService: PluginService,
         oipKlanttaakService: OipKlanttaakService,
+        buildingBlockPluginConfigurationResolver: BuildingBlockPluginConfigurationResolver,
     ) = OipKlanttaakTaskDeletedEventListener(
         processLinkService = processLinkService,
         pluginService = pluginService,
         oipKlanttaakService = oipKlanttaakService,
+        buildingBlockPluginConfigurationResolver = buildingBlockPluginConfigurationResolver
     )
 }

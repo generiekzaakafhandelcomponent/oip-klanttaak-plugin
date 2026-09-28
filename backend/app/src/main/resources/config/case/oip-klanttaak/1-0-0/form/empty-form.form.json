@@ -1,0 +1,14 @@
+{
+    "display": "form",
+    "components": [
+        {
+            "id": "ez8wcn",
+            "key": "submit",
+            "type": "button",
+            "input": true,
+            "label": "Close case",
+            "tableView": false,
+            "disableOnInvalid": true
+        }
+    ]
+}
