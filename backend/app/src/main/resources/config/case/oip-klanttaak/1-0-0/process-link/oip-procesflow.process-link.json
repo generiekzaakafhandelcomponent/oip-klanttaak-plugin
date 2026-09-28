@@ -11,6 +11,10 @@
       {
         "source": "pv:oipTaskExpirationDate",
         "target": "oipTaskExpirationDate"
+      },
+      {
+        "source": "pv:volledigeNaam",
+        "target": "volledigeNaam"
       }
     ],
     "outputMappings": [
@@ -47,7 +51,7 @@
         },
         {
           "key": "/volledige_naam",
-          "value": "doc:/volledigeNaam"
+          "value": "pv:volledigeNaam"
         }
       ]
     },

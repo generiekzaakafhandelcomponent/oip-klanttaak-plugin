@@ -51,7 +51,8 @@
       "attributes" : {
         "data-testid" : "start-form-doc:/volledigeNaam"
       },
-      "applyMaskOn" : "change"
+      "applyMaskOn" : "change",
+      "defaultValue" : "Willem van Buren"
     },
     {
       "key" : "submit",
