@@ -17,7 +17,10 @@
 package com.ritense.valtimoplugins.oipklanttaak.listener
 
 import com.ritense.plugin.domain.PluginConfigurationId
+import com.ritense.plugin.domain.PluginConfigurationReference
+import com.ritense.plugin.domain.PluginConfigurationReferenceType
 import com.ritense.plugin.domain.PluginProcessLink
+import com.ritense.plugin.service.BuildingBlockPluginConfigurationResolver
 import com.ritense.plugin.service.PluginService
 import com.ritense.processlink.domain.ProcessLink
 import com.ritense.processlink.service.ProcessLinkService
@@ -44,7 +47,8 @@ class OipKlanttaakTaskDeletedEventListenerTest {
     private lateinit var processLinkServiceMock: ProcessLinkService
     private lateinit var pluginServiceMock: PluginService
     private lateinit var oipKlanttaakServiceMock: OipKlanttaakService
-
+    private lateinit var buildingBlockPluginConfigurationResolver: BuildingBlockPluginConfigurationResolver
+    private lateinit var pluginConfigurationReference: PluginConfigurationReference
     private lateinit var listener: OipKlanttaakTaskDeletedEventListener
 
     @BeforeEach
@@ -52,19 +56,63 @@ class OipKlanttaakTaskDeletedEventListenerTest {
         processLinkServiceMock = mock()
         pluginServiceMock = mock()
         oipKlanttaakServiceMock = mock()
+        buildingBlockPluginConfigurationResolver = mock()
+        pluginConfigurationReference = mock()
 
         listener =
             OipKlanttaakTaskDeletedEventListener(
                 processLinkService = processLinkServiceMock,
                 pluginService = pluginServiceMock,
                 oipKlanttaakService = oipKlanttaakServiceMock,
+                buildingBlockPluginConfigurationResolver = buildingBlockPluginConfigurationResolver
             )
     }
 
     @Test
+    fun `onTaskDeleted should withdraw delegated task when link and stamped url are present in building block`() {
+        val event = operatonTaskEvent()
+        val delegateTask = event.delegateTask
+        val pluginDefinitionKey = "oip-klanttaak"
+
+        doReturn(PluginConfigurationReferenceType.BUILDING_BLOCK)
+            .whenever(pluginConfigurationReference)
+            .type
+
+        doReturn(pluginDefinitionKey)
+            .whenever(pluginConfigurationReference)
+            .pluginDefinitionKey
+
+        doReturn(listOf(delegateTaskProcessLink()))
+            .whenever(processLinkServiceMock)
+            .getProcessLinks(eq(processDefinitionId()), eq(taskDefinitionKey()))
+
+        doReturn(oipKlanttaakPlugin())
+            .whenever(pluginServiceMock)
+            .createInstance<OipKlanttaakPlugin>(eq(pluginConfigurationId()))
+
+        doReturn(pluginConfigurationId())
+            .whenever(buildingBlockPluginConfigurationResolver)
+            .resolve(delegateTask, pluginDefinitionKey)
+
+        // when
+        assertDoesNotThrow {
+            listener.onTaskDeleted(event)
+        }
+
+        // then
+        verify(oipKlanttaakServiceMock).withdrawDelegatedTask(
+            objectManagementId = eq(objectManagementConfigurationId()),
+            klanttaakObjectUrl = eq(objectUrl()),
+        )
+    }
+    @Test
     fun `onTaskDeleted should withdraw delegated task when link and stamped url are present`() {
         // given
         val event = operatonTaskEvent()
+
+        doReturn(PluginConfigurationReferenceType.FIXED)
+            .whenever(pluginConfigurationReference)
+            .type
 
         doReturn(listOf(delegateTaskProcessLink()))
             .whenever(processLinkServiceMock)
@@ -159,6 +207,7 @@ class OipKlanttaakTaskDeletedEventListenerTest {
         mock<PluginProcessLink> {
             on { pluginActionDefinitionKey } doReturn "delegate-task"
             on { pluginConfigurationId } doReturn PluginConfigurationId.existingId(pluginConfigurationId())
+            on { pluginConfigurationReference } doReturn pluginConfigurationReference
         }
 
     private fun nonDelegateTaskProcessLink() =

@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de OIP Klanttaak-plugin.
 
+## 1.1.0
+
+Ondersteuning toegevoegd voor building blocks via `BuildingBlockPluginConfigurationResolver`.
+
 ## 1.0.5
 
 Gedelegeerde klanttaken worden nu op status `ingetrokken` gezet wanneer de taak wordt verwijderd of afgebroken voordat de inwoner deze heeft ingediend. Valtimo bijgewerkt naar versie 13.46.0.
