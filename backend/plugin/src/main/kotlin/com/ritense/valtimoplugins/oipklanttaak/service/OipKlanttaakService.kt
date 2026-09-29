@@ -91,42 +91,18 @@ class OipKlanttaakService(
                                         typeVersion = objectManagement.objecttypeVersion,
                                         data =
                                             objectMapper.convertValue(
-                                                Klanttaak(
-                                                    titel = delegateTask.name,
-                                                    status = Status.OPEN,
-                                                    eigenaar = taskOwner,
-                                                    betrokkene =
-                                                        Betrokkene(
-                                                            levelOfAssurance = levelOfAssurance,
-                                                            authorizee =
-                                                                Authorizee(
-                                                                    legalSubject =
-                                                                        LegalSubject(
-                                                                            identifier = authorizeeIdentifier,
-                                                                        ),
-                                                                ),
-                                                        ),
-                                                    portaalformulier =
-                                                        Portaalformulier(
-                                                            formulier =
-                                                                Formulier(
-                                                                    value = formUri,
-                                                                ),
-                                                            data =
-                                                                formDataMapping?.let {
-                                                                    resolveTaakData(
-                                                                        delegateTask = delegateTask,
-                                                                        formDataMapping = it,
-                                                                    )
-                                                                },
-                                                            verzondenData = emptyMap(),
-                                                        ),
-                                                    verwerkerTaakId = UUID.fromString(delegateTask.id),
+                                                buildKlanttaak(
+                                                    delegateTask = delegateTask,
+                                                    taskOwner = taskOwner,
+                                                    authorizeeIdentifier = authorizeeIdentifier,
+                                                    levelOfAssurance = levelOfAssurance,
+                                                    expirationDate = expirationDate,
+                                                    formUri = formUri,
+                                                    formDataMapping = formDataMapping,
+                                                    description = description,
                                                     koppeling = koppeling,
-                                                    toelichting = description,
-                                                    doorlooptijd = leadTime,
-                                                    verloopdatum = expirationDate,
-                                                    deadlineVerlengbaar = deadlineExtendable,
+                                                    leadTime = leadTime,
+                                                    deadlineExtendable = deadlineExtendable,
                                                 ),
                                             ),
                                         startAt = LocalDate.now(),
@@ -145,6 +121,57 @@ class OipKlanttaakService(
                 }
         }
     }
+
+    private fun buildKlanttaak(
+        delegateTask: DelegateTask,
+        taskOwner: String,
+        authorizeeIdentifier: String,
+        levelOfAssurance: LevelOfAssurance,
+        expirationDate: OffsetDateTime,
+        formUri: URI,
+        formDataMapping: List<DataBinding>?,
+        description: String?,
+        koppeling: Koppeling?,
+        leadTime: Period?,
+        deadlineExtendable: Boolean?,
+    ): Klanttaak =
+        Klanttaak(
+            titel = delegateTask.name,
+            status = Status.OPEN,
+            eigenaar = taskOwner,
+            betrokkene =
+                Betrokkene(
+                    levelOfAssurance = levelOfAssurance,
+                    authorizee =
+                        Authorizee(
+                            legalSubject =
+                                LegalSubject(
+                                    identifier = authorizeeIdentifier,
+                                ),
+                        ),
+                ),
+            portaalformulier =
+                Portaalformulier(
+                    formulier =
+                        Formulier(
+                            value = formUri,
+                        ),
+                    data =
+                        formDataMapping?.let {
+                            resolveTaakData(
+                                delegateTask = delegateTask,
+                                formDataMapping = it,
+                            )
+                        },
+                    verzondenData = emptyMap(),
+                ),
+            verwerkerTaakId = UUID.fromString(delegateTask.id),
+            koppeling = koppeling,
+            toelichting = description,
+            doorlooptijd = leadTime,
+            verloopdatum = expirationDate,
+            deadlineVerlengbaar = deadlineExtendable,
+        )
 
     private fun resolveTaakData(
         delegateTask: DelegateTask,
