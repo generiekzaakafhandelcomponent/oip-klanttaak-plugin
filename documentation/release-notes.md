@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de OIP Klanttaak-plugin.
 
+## 1.1.1
+
+Ondersteuning voor Valtimo 13.48.0.
+
 ## 1.1.0
 
 Ondersteuning toegevoegd voor building blocks via `BuildingBlockPluginConfigurationResolver`.
